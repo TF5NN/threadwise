@@ -205,7 +205,9 @@ export const STRINGS = {
   'make.minorBasic': { en: 'Bore (minor diameter, basic)', is: 'Kjarnaþvermál róar D1 (grunnmál)' },
   'make.D2min': { en: 'Pitch diameter, smallest', is: 'Meðalþvermál, minnst' },
   'make.D2max': { en: 'Pitch diameter, largest', is: 'Meðalþvermál, mest' },
-  'make.majorMinInt': { en: 'Major diameter, at least', is: 'Ytra þvermál róar, a.m.k.' },
+  // The standards give the nut's major diameter a minimum only (clearance for the bolt's
+  // crests); how far past it the root goes is left to the tap or the tool.
+  'make.majorMinInt': { en: 'Thread root (major diameter), at least – no upper limit', is: 'Botn gengjunnar (ytra þvermál róar), minnst – ekkert efra mark' },
   'make.srcTable': { en: 'Limits from the standard’s tables.', is: 'Mörk úr töflum staðalsins.' },
   'make.srcFormula': {
     en: 'Some limits come from the standard’s formulas, where its tables have a gap or the standard gives formulas.',
