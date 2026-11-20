@@ -317,6 +317,10 @@ export const STRINGS = {
     en: 'Look-alike: {other} has almost the same pitch. Over {n} threads they differ: {a} mm here, {b} mm there.',
     is: 'Líkist: {other} hefur nánast sömu stigningu. Yfir {n} gengjur munar: {a} mm hér, {b} mm þar.',
   },
+  'find.lookalikeSize': {
+    en: 'Look-alike: {other} is only {size} off in size, with almost the same pitch. The wrong bolt can start, or be forced in, and then strip or hold weakly. Over {n} threads they differ: {a} mm here, {b} mm there.',
+    is: 'Líkist: {other} munar aðeins {size} í stærð og hefur nánast sömu stigningu. Rangur bolti getur gripið, eða verið þvingaður inn, og svo skemmt gengjurnar eða haldið illa. Yfir {n} gengjur munar: {a} mm hér, {b} mm þar.',
+  },
   'find.twin': {
     en: 'Twin: {other} has the same size and pitch. Only the flank angle tells them apart ({a} here, {b} there): use a thread gauge or the two-wire angle tool.',
     is: 'Tvífari: {other} hefur sömu stærð og stigningu. Aðeins gengjuhornið greinir á milli ({a} hér, {b} þar): notaðu gengjumæli eða tveggja víra hornið.',

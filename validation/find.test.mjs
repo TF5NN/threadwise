@@ -87,3 +87,45 @@ test('DIN 158 shows up once, as a tapered bolt, and never as a hole', () => {
   const int = rank({ side: 'int', d: 9.0, pitch: 1, minus: 0.1, plus: 0.4, taper: 'any' });
   assert.ok(!int.inside.some((x) => x.row.family === 'MK'));
 });
+
+// ---- Edge of the window, and look-alikes across standards ------------------------------------
+
+import { GAUGE_PITCH_TOL } from '../js/find.js';
+
+test('a worn M10 at 9.7 mm fits the default window (a new 6g M10 can already be 9.732)', () => {
+  const w = defaultWindows('ext', 9.7);
+  const r = rank({ side: 'ext', d: 9.7, pitch: 1.5, minus: w.minus, plus: w.plus, taper: 'parallel' });
+  assert.ok(r.inside.some((s) => s.row.name === 'M10'), r.inside.map((s) => s.row.name).join(', '));
+});
+
+test('a reading exactly on the edge of a typed window counts as inside (10 − 9.7 vs 0.3)', () => {
+  const r = rank({ side: 'ext', d: 9.7, pitch: 1.5, minus: 0.3, plus: 0.1, taper: 'parallel' });
+  assert.ok(r.inside.some((s) => s.row.name === 'M10'));
+});
+
+test('M10 and 3/8" look-alikes are flagged both ways (the JCB mix-up), even outside the windows', () => {
+  const lookalikes = (d, pitch, name) => {
+    const w = defaultWindows('ext', d);
+    const r = rank({ side: 'ext', d, pitch, minus: w.minus, plus: w.plus, taper: 'parallel' });
+    const me = [...r.inside, ...r.closest].find((s) => s.row.name === name);
+    assert.ok(me, `${name} not listed`);
+    return me.lookalikes.map((s) => s.row.name);
+  };
+  assert.ok(lookalikes(9.8, 1.5, 'M10').includes('3/8-16 UNC'));
+  assert.ok(lookalikes(9.8, 1.0, 'M10 × 1').includes('3/8-24 UNF'));
+  assert.ok(lookalikes(9.8, 1.25, 'M10 × 1.25').includes('3/8 BSF'));
+  assert.ok(lookalikes(9.45, 25.4 / 24, '3/8-24 UNF').includes('M10 × 1'));
+  assert.ok(lookalikes(9.45, 25.4 / 16, '3/8-16 UNC').includes('M10'));
+  // Not every neighbour is a look-alike: M10 and 3/8-24 UNF are 30 % apart in pitch.
+  assert.ok(!lookalikes(9.8, 1.5, 'M10').includes('3/8-24 UNF'));
+});
+
+test('a pitch gauge on a dirty bolt: 1.5 mm keeps 3/8-16 UNC in the list, and M10 stays on top', () => {
+  assert.ok(GAUGE_PITCH_TOL >= 0.056); // 1.5 mm vs 16 TPI is 5.5 % apart
+  // 9.6 mm could be a worn M10 or a 3/8" that measures a little over (dirt on the crests).
+  const w = defaultWindows('ext', 9.6);
+  const r = rank({ side: 'ext', d: 9.6, pitch: 1.5, minus: w.minus, plus: w.plus, taper: 'parallel' });
+  const names = r.inside.map((s) => s.row.name);
+  assert.equal(names[0], 'M10');
+  assert.ok(names.includes('3/8-16 UNC'), names.join(', '));
+});

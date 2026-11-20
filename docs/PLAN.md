@@ -164,10 +164,15 @@ published over-wire table (Thread Check / Machinery's Handbook) where one exists
 - Each input has a window the user can widen or narrow. Defaults lean the way real parts
   lean: an external thread usually measures *under* nominal (allowance plus wear), so its
   default window is about −0.4 / +0.1 mm and scales with size; an internal bore measures over
-  the basic minor diameter.
-- Pitch is compared in both mm and TPI. Look-alikes (1.5 mm vs 16 TPI, 1.25 mm vs 20 TPI,
-  0.8 mm vs 32 TPI, 1.814 mm vs 14 TPI) are flagged on the result, with what to check to tell
-  them apart.
+  the basic minor diameter. (20 Nov 2026: bolts −5 % of the reading, at least 0.2 mm. A new
+  6g M10 can already be 2.7 % under, and the 3 % first built left a worn 9.7 mm M10 out.)
+- Pitch is compared in both mm and TPI. A gauge reading gets ±6 % by default, since on a
+  dirty or rusty bolt 1.5 mm and 16 TPI (5.5 % apart) both seem to fit; over N threads with a
+  caliper, 0.1 mm over the length.
+- Look-alikes across standards are flagged on the result whether or not both fit the
+  measurement: within 6 % in size and pitch, so the wrong bolt can start or be forced in
+  (M10 / 3/8-16 UNC and BSW, M10 × 1 / 3/8-24 UNF, M10 × 1.25 / 3/8 BSF; a JCB parts listing
+  warns about exactly this). The warning says how far apart they are over N threads.
 - Results are ranked by a combined distance and grouped by family, with the closest few
   shown in full and the rest one tap away.
 - Pipe threads are shown by both their name and their actual size, because "1/2 inch"
