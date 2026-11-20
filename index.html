@@ -17,7 +17,7 @@
     <link rel="stylesheet" href="css/style.css" />
     <script src="js/lang.js"></script>
     <script src="js/theme.js"></script>
-    <script type="module" src="js/app.js"></script>
+    <script type="module" src="js/main.js"></script>
   </head>
   <body>
     <div class="app-shell">
@@ -53,23 +53,25 @@
         </div>
       </header>
 
-      <main class="layout">
+      <nav class="tabs" role="tablist" aria-label="Tools" data-i18n-attr="aria-label:tabs.label">
+        <button type="button" role="tab" id="tab-btn-measure" data-tab="measure" aria-controls="tab-measure" data-i18n="tabs.measure">Measure</button>
+        <button type="button" role="tab" id="tab-btn-make" data-tab="make" aria-controls="tab-make" data-i18n="tabs.make">Make</button>
+        <button type="button" role="tab" id="tab-btn-find" data-tab="find" aria-controls="tab-find" data-i18n="tabs.find">Find</button>
+      </nav>
+
+      <main>
+      <section class="layout" id="tab-measure" role="tabpanel" aria-labelledby="tab-btn-measure">
         <div class="inputs">
           <!-- The thread and its tolerance -->
           <section class="panel" aria-labelledby="thread-title">
             <h2 id="thread-title" data-i18n="thread.title">Thread</h2>
-            <p class="hint" data-i18n="thread.hint">External 60° threads, single start.</p>
-
-            <div class="row">
-              <span class="eyebrow" id="sys-label" data-i18n="sys.label">Thread system</span>
-              <div class="seg" role="radiogroup" aria-labelledby="sys-label" id="system">
-                <button type="button" role="radio" data-value="metric" data-i18n="sys.metric">Metric (ISO)</button>
-                <button type="button" role="radio" data-value="inch" data-i18n="sys.inch">Inch (UN)</button>
-              </div>
-            </div>
+            <p class="hint" data-i18n="thread.hint">External parallel threads, single start.</p>
 
             <div class="fields">
-              <label class="wide"><span data-i18n="preset.label">Common size</span>
+              <label><span data-i18n="fam.label">Thread type</span>
+                <select id="fam"></select>
+              </label>
+              <label><span data-i18n="preset.label">Size</span>
                 <select id="preset"></select>
               </label>
               <label><span data-i18n="d.label">Nominal diameter</span> <span class="u" id="d-unit">mm</span>
@@ -105,6 +107,7 @@
               </div>
             </div>
             <p class="note" id="wire-fit" role="status"></p>
+            <p class="note quiet" id="w-note" hidden></p>
           </section>
 
           <!-- The tolerance -->
@@ -182,10 +185,195 @@
             </div>
           </section>
         </div>
+      </section>
+
+      <section class="layout" id="tab-make" role="tabpanel" aria-labelledby="tab-btn-make" hidden>
+        <div class="inputs">
+          <section class="panel" aria-labelledby="k-title">
+            <h2 id="k-title" data-i18n="make.title">Thread to make</h2>
+            <div class="fields">
+              <label><span data-i18n="fam.label">Thread type</span><select id="k-fam"></select></label>
+              <label><span data-i18n="preset.label">Size</span><select id="k-size"></select></label>
+            </div>
+            <div class="row">
+              <span class="eyebrow" id="k-side-label" data-i18n="make.side">Outside or inside</span>
+              <div class="seg" role="radiogroup" aria-labelledby="k-side-label" id="k-side">
+                <button type="button" role="radio" data-value="ext" data-i18n="side.ext">External</button>
+                <button type="button" role="radio" data-value="int" data-i18n="side.int">Internal</button>
+              </div>
+            </div>
+            <div class="fields" id="k-cls-wrap">
+              <label><span data-i18n="cls.label">Tolerance class</span><select id="k-cls"></select></label>
+            </div>
+            <p class="pitch-line" id="k-pitch"></p>
+          </section>
+
+          <section class="panel" aria-labelledby="k-cut-title">
+            <h2 id="k-cut-title" data-i18n="make.cutTitle">Single-point threading</h2>
+            <div class="row first">
+              <div class="seg" role="radiogroup" aria-label="Infeed" data-i18n-attr="aria-label:make.feed" id="k-feed">
+                <button type="button" role="radio" data-value="radial" data-i18n="make.radial">Straight in (radial)</button>
+                <button type="button" role="radio" data-value="flank" data-i18n="make.flank">On the compound</button>
+              </div>
+            </div>
+            <dl class="pd">
+              <div><dt data-i18n="make.depth">Thread depth (radial)</dt><dd id="k-depth"></dd></div>
+              <div id="k-compound-row"><dt data-i18n="make.compound">Compound set to</dt><dd id="k-compound"></dd></div>
+              <div id="k-travel-row"><dt data-i18n="make.travel">Total on the compound dial</dt><dd id="k-travel"></dd></div>
+            </dl>
+            <p class="note quiet" data-i18n="make.compoundNote">The compound angle is measured from the cross-slide direction: half the thread angle less ½°, so the trailing flank only shaves. Some compounds are marked so that 29.5° reads 60.5°.</p>
+            <div class="fields passes-n">
+              <label><span data-i18n="make.passes">Number of passes</span><input id="k-n" inputmode="numeric" autocomplete="off" /></label>
+            </div>
+            <div class="table-wrap">
+              <table class="data">
+                <thead><tr><th data-i18n="make.pass">Pass</th><th data-i18n="make.thisPass">This pass</th><th id="k-pass-head-feed">On the compound</th><th data-i18n="make.radialTotal">Radial total</th></tr></thead>
+                <tbody id="k-passes"></tbody>
+              </table>
+            </div>
+            <p class="note quiet" data-i18n="make.passNote">A starting point: each pass removes about the same area of chip, so the passes get smaller as the tool goes deeper. Add one or two spring passes, and adjust for your machine, insert and material.</p>
+          </section>
+        </div>
+
+        <div class="outputs">
+          <section class="panel" aria-labelledby="k-sizes-title">
+            <div class="res-head">
+              <h2 id="k-sizes-title" data-i18n="make.sizes">Sizes</h2>
+              <div class="seg small" role="radiogroup" aria-label="Show in" data-i18n-attr="aria-label:res.unit" id="k-u">
+                <button type="button" role="radio" data-value="mm">mm</button>
+                <button type="button" role="radio" data-value="in">in</button>
+              </div>
+            </div>
+            <dl class="pd one" id="k-sizes"></dl>
+            <p class="note" id="k-source"></p>
+          </section>
+
+          <section class="panel" id="k-drill-panel" aria-labelledby="k-drill-title" hidden>
+            <h2 id="k-drill-title" data-i18n="make.drillTitle">Tap drill</h2>
+            <p class="hint" data-i18n="make.drillHint">Drills near 75 % of thread. A drill inside the minor-diameter limits gives a hole the class accepts; drills often cut a little oversize.</p>
+            <div class="table-wrap">
+              <table class="data">
+                <thead><tr><th data-i18n="make.drill">Drill</th><th data-i18n="make.size">Size</th><th data-i18n="make.pct">Thread</th><th data-i18n="make.limits">Limits</th></tr></thead>
+                <tbody id="k-drills"></tbody>
+              </table>
+            </div>
+          </section>
+          <p class="note warn" id="k-taper-drill" hidden data-i18n="make.taperDrill">Tapered internal threads: drill to the minor diameter at the small end and taper-ream before tapping, or use the tap maker's chart. Tap drills for tapered threads are not in Threadwise yet.</p>
+        </div>
+      </section>
+
+      <section class="layout" id="tab-find" role="tabpanel" aria-labelledby="tab-btn-find" hidden>
+        <div class="inputs">
+          <section class="panel" aria-labelledby="f-title">
+            <h2 id="f-title" data-i18n="find.title">What you have</h2>
+            <p class="hint" data-i18n="find.hint">Measure the thread and fill in what you can. The list updates as you type.</p>
+            <div class="row first">
+              <div class="seg" role="radiogroup" aria-label="Outside or inside" data-i18n-attr="aria-label:make.side" id="f-side">
+                <button type="button" role="radio" data-value="ext" data-i18n="side.extLong">Bolt (external)</button>
+                <button type="button" role="radio" data-value="int" data-i18n="side.intLong">Nut or hole (internal)</button>
+              </div>
+            </div>
+            <div class="fields">
+              <label><span id="f-d-label">Diameter over the crests</span> <span class="u f-du-text">mm</span>
+                <input id="f-d" inputmode="decimal" autocomplete="off" spellcheck="false" />
+                <small class="field-hint" id="f-d-hint"></small>
+              </label>
+              <div class="unit-pick">
+                <div class="seg small" role="radiogroup" aria-label="Unit" id="f-du">
+                  <button type="button" role="radio" data-value="mm">mm</button>
+                  <button type="button" role="radio" data-value="in">in</button>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <span class="eyebrow" id="f-pm-label" data-i18n="find.pitchHow">Pitch</span>
+              <div class="seg" role="radiogroup" aria-labelledby="f-pm-label" id="f-pm">
+                <button type="button" role="radio" data-value="mm" data-i18n="find.pmMm">Gauge, mm</button>
+                <button type="button" role="radio" data-value="tpi" data-i18n="find.pmTpi">Gauge, TPI</button>
+                <button type="button" role="radio" data-value="over" data-i18n="find.pmOver">Over N threads</button>
+              </div>
+            </div>
+            <div class="fields" id="f-p-single">
+              <label><span data-i18n="p.label">Pitch</span> <span class="u" id="f-p-unit">mm</span>
+                <input id="f-p" inputmode="decimal" autocomplete="off" spellcheck="false" />
+              </label>
+            </div>
+            <div class="fields" id="f-p-over" hidden>
+              <label><span data-i18n="find.len">Length</span> <span class="u f-du-text">mm</span>
+                <input id="f-len" inputmode="decimal" autocomplete="off" spellcheck="false" />
+              </label>
+              <label><span data-i18n="find.n">Over this many threads</span>
+                <input id="f-n" inputmode="numeric" autocomplete="off" />
+              </label>
+              <p class="field-hint wide" data-i18n="find.overHint">Measure from one crest to the crest N threads further along. 10 threads or more makes the pitch much more precise.</p>
+            </div>
+            <p class="pitch-line" id="f-pitch-read"></p>
+            <div class="fields">
+              <label><span data-i18n="find.angle">Flank angle</span>
+                <select id="f-angle">
+                  <option value="" data-i18n="find.angleUnknown">Not known</option>
+                  <option value="55">55° (Whitworth, G, R)</option>
+                  <option value="60">60° (metric, UN, NPT)</option>
+                  <option value="80">80° (Pg)</option>
+                </select>
+              </label>
+            </div>
+            <div class="row">
+              <span class="eyebrow" id="f-taper-label" data-i18n="find.taper">Parallel or tapered</span>
+              <div class="seg" role="radiogroup" aria-labelledby="f-taper-label" id="f-taper">
+                <button type="button" role="radio" data-value="any" data-i18n="find.taperAny">Not sure</button>
+                <button type="button" role="radio" data-value="parallel" data-i18n="find.parallel">Parallel</button>
+                <button type="button" role="radio" data-value="taper" data-i18n="find.tapered">Tapered</button>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel" aria-labelledby="f-tw-title">
+            <details class="more">
+              <summary><h2 id="f-tw-title" data-i18n="find.twTitle">Flank angle from two wire sizes</h2></summary>
+              <p class="hint" data-i18n="find.twHint">Measure over three wires of one size, then over three wires of another size, at the same spot. The difference gives the flank angle, whatever the diameter or pitch. Two sizes about 0.4 mm apart and a micrometer that repeats to 2 µm give the angle to about ±0.4°.</p>
+              <div class="unit-pick"><div class="seg small" role="radiogroup" aria-label="Unit" id="f-wu">
+                <button type="button" role="radio" data-value="mm">mm</button>
+                <button type="button" role="radio" data-value="in">in</button>
+              </div> <span class="u" id="f-wu-text">mm</span></div>
+              <div class="fields four">
+                <label><span data-i18n="find.g1">Wire 1</span><input id="f-g1" inputmode="decimal" autocomplete="off" /></label>
+                <label><span data-i18n="find.m1">Reading 1</span><input id="f-m1" inputmode="decimal" autocomplete="off" /></label>
+                <label><span data-i18n="find.g2">Wire 2</span><input id="f-g2" inputmode="decimal" autocomplete="off" /></label>
+                <label><span data-i18n="find.m2">Reading 2</span><input id="f-m2" inputmode="decimal" autocomplete="off" /></label>
+              </div>
+              <p class="note" id="f-tw-result" hidden></p>
+              <button type="button" id="f-tw-use" hidden data-i18n="find.twUse">Use this angle</button>
+            </details>
+          </section>
+
+          <section class="panel" aria-labelledby="f-win-title">
+            <details class="more">
+              <summary><h2 id="f-win-title" data-i18n="find.winTitle">How close is close enough</h2></summary>
+              <p class="hint" data-i18n="find.winHint">Real parts are not exactly basic size: bolts measure under, holes over. Widen these for worn or damaged threads. Empty boxes use the defaults shown.</p>
+              <div class="fields">
+                <label><span data-i18n="find.minus">Diameter, smaller by up to</span> <span class="u f-du-text">mm</span><input id="f-wm" inputmode="decimal" autocomplete="off" /></label>
+                <label><span data-i18n="find.plus">Diameter, larger by up to</span> <span class="u f-du-text">mm</span><input id="f-wp" inputmode="decimal" autocomplete="off" /></label>
+                <label><span data-i18n="find.pw">Pitch, off by up to</span> <span class="u">%</span><input id="f-pw" inputmode="decimal" autocomplete="off" /></label>
+              </div>
+              <button type="button" id="f-reset" data-i18n="find.reset">Back to defaults</button>
+            </details>
+          </section>
+        </div>
+
+        <div class="outputs">
+          <section class="panel" aria-labelledby="f-res-title">
+            <h2 id="f-res-title" data-i18n="find.resTitle">It could be</h2>
+            <p class="note" id="f-summary" role="status"></p>
+            <ol class="cands" id="f-results"></ol>
+            <p class="note quiet" data-i18n="find.rankNote">Ranked by how close each is to what you measured. Threadwise never decides for you: check the top few with a gauge or a known nut or bolt.</p>
+          </section>
+        </div>
+      </section>
       </main>
 
       <footer class="foot">
-        <span>Threadwise <span id="version">v0.1.0</span> · Gunnar B. Guðlaugsson, TF5NN · <span data-i18n="foot.sources">ISO 965-1 · ASME B1.1</span> · <span data-i18n="foot.disclaimer">No responsibility is taken for these calculations. See About.</span></span>
+        <span>Threadwise <span id="version">v0.1.0</span> · Gunnar B. Guðlaugsson, TF5NN · <span data-i18n="foot.disclaimer">No responsibility is taken for these calculations. See About.</span></span>
         <span class="foot-links">
           <a href="https://tf5nn.github.io/" data-i18n-attr="href:link.site">TF5NN ↗</a>
           <a href="https://github.com/TF5NN/threadwise">GitHub ↗</a>
@@ -198,24 +386,30 @@
 
       <div data-only="en" lang="en">
         <h2 id="about-title">About Threadwise</h2>
-        <p>The three-wire method measures the pitch diameter of an external thread with an ordinary micrometer. Three hardened wires of the same size go in the thread grooves, two on one side and one on the other, and you measure over them. Threadwise tells you what that reading should be, with the limits for the tolerance class.</p>
+        <p>Threadwise is three workshop tools in one, all reading from one catalogue of threads: metric ISO, unified inch (UNC, UNF, UNEF), Whitworth (BSW, BSF), pipe threads (G, R, NPT) and Pg.</p>
+        <h3>The three tabs</h3>
+        <ul>
+          <li><b>Measure:</b> what the micrometer should read over three wires, for any parallel thread, and whether a part you have measured is in tolerance.</li>
+          <li><b>Make:</b> sizes to turn or bore, tap drills with the percentage of thread, and depth and infeed for single-point threading, straight in or on the compound.</li>
+          <li><b>Find:</b> measure an unknown thread and get a ranked list of what it could be, with warnings for look-alikes. It can also work out the flank angle from two wire sizes.</li>
+        </ul>
         <h3>How it works</h3>
         <ul>
-          <li><b>Pitch diameter:</b> d2 = d − 0.649519·P.</li>
-          <li><b>Over the wires:</b> M = d2 + 3G − 0.866025·P, where G is the wire diameter. A change in the pitch diameter shows up one to one in M, so the tolerance carries straight over.</li>
-          <li><b>Wire sizes:</b> best 0.57735·P (touches at the pitch diameter), smallest 0.505182·P, largest 1.010363·P.</li>
-          <li><b>Metric tolerances:</b> from the ISO 965-1 tables for the fundamental deviation es and the pitch-diameter tolerance Td2. A combination that is not in the tables is worked out with the standard’s formulas and rounded to preferred numbers, and the app says so.</li>
-          <li><b>Inch tolerances:</b> ASME B1.1 formulas for classes 1A, 2A and 3A, with the standard length of engagement. They give the same pitch diameters as the published tables.</li>
+          <li><b>Over the wires:</b> M = d2 + G·(1 + 1/sin(α/2)) − (P/2)·cot(α/2), for flank angle α and wire diameter G. For 60° this is the familiar d2 + 3G − 0.866025·P.</li>
+          <li><b>Wire sizes:</b> the best wire touches the flanks at the pitch diameter; the smallest and largest are worked out from each thread form, including Whitworth's rounded crests.</li>
+          <li><b>Tolerances:</b> tables from ISO 965-1 and ISO 228-1, ASME B1.1 formulas, and makers' limits for Pg. Where a table has a gap, the standard's formulas fill it and the app says so.</li>
+          <li><b>Every number is checked:</b> the repository has a validation folder that compares Threadwise with published tables on every change.</li>
         </ul>
         <h3>Good to know</h3>
         <ul>
-          <li>External threads only, single start, 60° form.</li>
-          <li>The formulas leave out the lead angle. That is fine up to about 5°; the app warns above that.</li>
-          <li>The reading also depends on the measuring force and on the true size of your wires. For gauge work, use calibrated wires and the force they were calibrated at.</li>
+          <li>Tapered threads (R, NPT) are accepted with ring and plug gauges, so Measure covers parallel threads only.</li>
+          <li>Whitworth (BSW, BSF) tolerances are not in yet: Measure takes them by hand.</li>
+          <li>The usual wire formulas leave out the lead angle. That is fine up to about 5°; the app warns above that.</li>
+          <li>The reading also depends on the measuring force and on the true size of your wires.</li>
           <li>Numbers typed with a comma or a point both work.</li>
         </ul>
         <h3>Where it came from</h3>
-        <p>This began in 2021 as a spreadsheet I made for the workshop. In 2026 it learned the ISO 965-1 tables, then inch threads, and became a web page called Overwire. Threadwise is where it grows next: more thread types, and tabs for making and identifying threads.</p>
+        <p>This began in 2021 as a spreadsheet I made for the workshop, for measuring metric threads over wires. In 2026 it grew into this.</p>
         <div class="disclaimer">
           <h3>Disclaimer</h3>
           <p>Threadwise is a free hobby project. The calculations are checked against published sources, and the checks are in the <a href="https://github.com/TF5NN/threadwise/tree/main/validation">validation folder</a> of the repository, but I take no responsibility for their correctness, or for anything made, measured or accepted with them. Check anything that matters against the standard, with proper gauges.</p>
@@ -225,24 +419,30 @@
 
       <div data-only="is" lang="is">
         <h2>Um Threadwise</h2>
-        <p>Þriggja víra aðferðin mælir stigningarþvermál ytri gengju með venjulegum míkrómæli. Þrír hertir vírar af sömu stærð eru lagðir í gengjurnar, tveir öðrum megin og einn hinum megin, og mælt yfir þá. Threadwise segir þér hvað mælirinn á að sýna, með mörkum málvikaflokksins.</p>
+        <p>Threadwise eru þrjú verkstæðistól í einu, sem öll lesa úr einni gengjuskrá: metrískar ISO-gengjur, tommugengjur (UNC, UNF, UNEF), Whitworth (BSW, BSF), rörgengjur (G, R, NPT) og Pg.</p>
+        <h3>Fliparnir þrír</h3>
+        <ul>
+          <li><b>Mæla:</b> hvað míkrómælirinn á að sýna yfir þrjá víra, fyrir allar beinar gengjur, og hvort stykki sem þú hefur mælt sé innan málviks.</li>
+          <li><b>Smíða:</b> mál til að renna eða bora, borastærðir fyrir snitttappa með hlutfalli gengju, og dýpt og innmötun þegar gengja er skorin með stáli, beint inn eða á toppsleða.</li>
+          <li><b>Finna:</b> mældu óþekkta gengju og fáðu raðaðan lista yfir hvað hún gæti verið, með viðvörunum um gengjur sem líkjast. Það getur líka reiknað flankahornið út frá tveimur vírastærðum.</li>
+        </ul>
         <h3>Hvernig það virkar</h3>
         <ul>
-          <li><b>Stigningarþvermál:</b> d2 = d − 0,649519·P.</li>
-          <li><b>Mál yfir víra:</b> M = d2 + 3G − 0,866025·P, þar sem G er þvermál vírsins. Breyting á stigningarþvermáli kemur einn á móti einum fram í M, svo málvikið flyst beint yfir.</li>
-          <li><b>Vírastærðir:</b> besta 0,57735·P (snertir við stigningarþvermál), minnsta 0,505182·P, stærsta 1,010363·P.</li>
-          <li><b>Metrísk málvik:</b> úr töflum ISO 965-1 fyrir grunnfrávik es og málvik stigningarþvermáls Td2. Samsetning sem er ekki í töflunum er reiknuð með formúlum staðalsins og námunduð að valgildum, og forritið segir frá því.</li>
-          <li><b>Tommumálvik:</b> formúlur ASME B1.1 fyrir flokka 1A, 2A og 3A, með staðlaðri griplengd. Þær gefa sömu stigningarþvermál og útgefnu töflurnar.</li>
+          <li><b>Mál yfir víra:</b> M = d2 + G·(1 + 1/sin(α/2)) − (P/2)·cot(α/2), fyrir flankahorn α og vírþvermál G. Fyrir 60° er þetta hið kunnuglega d2 + 3G − 0,866025·P.</li>
+          <li><b>Vírastærðir:</b> besti vírinn snertir flankana við stigningarþvermál; minnsta og stærsta stærð eru reiknaðar út frá sniði hverrar gengju, þar á meðal rúnnuðum toppum Whitworth.</li>
+          <li><b>Málvik:</b> töflur úr ISO 965-1 og ISO 228-1, formúlur ASME B1.1 og mörk framleiðenda fyrir Pg. Þar sem tafla hefur gat fylla formúlur staðalsins í það og forritið segir frá því.</li>
+          <li><b>Allar tölur eru prófaðar:</b> í kóðasafninu er validation-mappa sem ber Threadwise saman við útgefnar töflur við hverja breytingu.</li>
         </ul>
         <h3>Gott að vita</h3>
         <ul>
-          <li>Aðeins ytri gengjur, einföld stigning, 60° snið.</li>
-          <li>Formúlurnar sleppa stigningarhorninu. Það er í lagi upp að um 5°; forritið varar við ef það fer yfir.</li>
-          <li>Mælingin fer líka eftir mælikrafti og raunstærð víranna. Í kvörðunarvinnu skal nota kvarðaða víra og þann kraft sem þeir voru kvarðaðir við.</li>
+          <li>Keilugengjur (R, NPT) eru samþykktar með hring- og tappamælum, svo Mæla nær aðeins yfir beinar gengjur.</li>
+          <li>Málvik fyrir Whitworth (BSW, BSF) eru ekki komin inn: í Mæla eru þau slegin inn handvirkt.</li>
+          <li>Venjulegu víraformúlurnar sleppa stigningarhorninu. Það er í lagi upp að um 5°; forritið varar við ef það fer yfir.</li>
+          <li>Mælingin fer líka eftir mælikrafti og raunstærð víranna.</li>
           <li>Það má slá tölur inn með kommu eða punkti.</li>
         </ul>
         <h3>Hvaðan þetta kemur</h3>
-        <p>Þetta byrjaði árið 2021 sem reiknivél í Excel sem ég gerði fyrir verkstæðið. Árið 2026 lærði hún töflur ISO 965-1, svo tommugengjur, og varð að vefsíðu sem hét Overwire. Threadwise er þar sem hún vex áfram: fleiri gengjugerðir, og flipar til að smíða og bera kennsl á gengjur.</p>
+        <p>Þetta byrjaði árið 2021 sem reiknivél í Excel sem ég gerði fyrir verkstæðið, til að mæla metrískar gengjur yfir víra. Árið 2026 óx hún í þetta.</p>
         <div class="disclaimer">
           <h3>Fyrirvari</h3>
           <p>Threadwise er frítt áhugamálsverkefni. Útreikningarnir eru bornir saman við útgefnar heimildir og prófanirnar eru í <a href="https://github.com/TF5NN/threadwise/tree/main/validation">validation-möppu</a> kóðasafnsins, en ég ber enga ábyrgð á réttmæti þeirra, né á neinu sem er smíðað, mælt eða samþykkt út frá þeim. Berðu allt sem skiptir máli saman við staðalinn og notaðu viðeigandi mæla.</p>

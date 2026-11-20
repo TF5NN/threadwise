@@ -4,7 +4,7 @@ Threadwise is one app with three tabs, all reading from one catalogue of threads
 
 | Tab | Question it answers |
 |---|---|
-| **Measure** | "What should my micrometer read over the wires, and is my part in tolerance?" (Overwire, grown up) |
+| **Measure** | "What should my micrometer read over the wires, and is my part in tolerance?" |
 | **Make** | "What do I drill, turn, and how deep do I cut, for this thread, inside or out?" |
 | **Find** | "I have a thread in my hand. What is it?" |
 
@@ -20,14 +20,14 @@ holds the proof (`validation/`), and the app says which kind of number you are l
 ## Principles
 
 1. **Tables beat formulas.** Where a standard publishes a table, the table is used.
-   Formulas only fill gaps, and the page says so (as Overwire does with ISO 965-1).
+   Formulas only fill gaps, and the page says so.
 2. **Every value has a source.** Each catalogue row carries where it came from
    (`docs/SOURCES.md` lists them, with a quality tier).
 3. **Two sources or one official one.** A value goes in only if it matches the standard
    itself (or an official, identical national adoption), or two independent secondary
    sources agree. Disagreements go in `validation/DISCREPANCIES.md`, never silently fixed.
 4. **Never assume what the user has.** Wire sizes, measured values and tolerance class are
-   typed in, not guessed (lesson from Overwire).
+   typed in, not guessed.
 5. **Rank, never decide.** Find shows candidates with how far off each one is, and flags
    look-alikes. It never says "this is it".
 6. **Honest about limits.** Tapered threads, worn threads, lead angle, coatings: each limit
@@ -61,23 +61,39 @@ BSP tapered. The app shows both names: "G 1/2 (BSPP)".
 
 ---
 
+## Status (20 Nov 2026)
+
+| Phase | State |
+|---|---|
+| 0 Foundation | ✓ Done: three tabs, address state, disclaimer, CI with validation |
+| 1 Catalogue | ✓ Done: 251 sizes in 8 families, every row sourced and checked |
+| 2 Measure | ✓ Done for metric, UN, G, Pg; BSW/BSF with manual tolerance (BS 84 not sourced) |
+| 3 Find | ✓ Done: ranking, look-alikes, twins, two-wire angle tool, 2510-reading validation |
+| 4 Make | ✓ Done: limits, tap drills, radial/compound infeed, passes, taper data. Gaps listed below |
+| 5 Later | Open |
+
+**Still open** (each needs a source before it goes in):
+- BS 84 tolerances for BSW/BSF (Measure and Make show basic sizes until then).
+- Second source for the G internal minor-diameter tolerance at 11 TPI (`DISCREPANCIES.md`).
+- ISO 7-1 gauge lengths for R threads; tap drills for tapered threads.
+- ASME B1.1 internal minor-diameter tolerance (Make shows the minimum only).
+- DIN 76 thread undercuts.
+- Bench-measured parts for `validation/find-bench.csv`.
+
 ## Phases
 
-Each phase ends with a working, published app and green checks. Each is sized for one or
-two sessions.
+Each phase ends with a working, published app and green checks.
 
 ### Phase 0: Foundation
 
-- Rename Overwire → Threadwise in the page; three tabs (Measure live, Make and Find "coming").
+- Three tabs (Measure, Make, Find).
 - Tab state in the address (`#measure`, `#make`, `#find`) so each tab can be bookmarked.
 - Catalogue data model (below) and its loader.
 - Disclaimer in the app (About, footer, first open), README and site pages. ✓ text done.
 - `validation/` harness running in CI next to the unit tests. ✓ started.
 - `CLAUDE.md` with the rules for future sessions. ✓
-- Decide what happens to the Overwire repo (archive with a link here, or keep as a redirect).
 
-**Done when:** the live page is Overwire under the Threadwise name, with tabs, and CI runs
-both `test/` and `validation/`.
+**Done when:** the live page has the tabs, and CI runs both `test/` and `validation/`.
 
 ### Phase 1: The catalogue
 
@@ -218,8 +234,10 @@ publishes when both pass (as Feedpoint does).
 | Find could look more certain than it is. | Ranked list with distances and look-alike warnings, never a single answer. |
 | Scope: three tabs, seven families. | Phases are each shippable; the live app is never half-done. |
 
-**For Gunnar to decide:**
-1. Overwire repo: archive it with a link here, or keep it and point it at Threadwise?
-2. Which families matter most in Iceland (G for plumbing, metric, BSW on old machines, NPT on US hydraulics)? This sets the order inside each phase.
-3. Make: which infeed method do you use (compound at 29.5°, or straight radial)? Should the pass schedule follow a rule you trust?
-4. Do you have Machinery's Handbook (or similar) at hand? A second human-checked source for spot checks is worth a lot.
+**Decided (20 Nov 2026):**
+1. The Overwire repo is deleted; Threadwise is the only home.
+2. Order within phases: G (plumbing), metric, BSW (old machines), NPT (US hydraulics), then the rest.
+3. Infeed: a toggle between straight radial infeed and the compound; the compound angle follows
+   the thread angle (half the angle less ½°). Gunnar ran CNC, so the pass schedule is a
+   labelled starting point (constant chip area), not a rule.
+4. Machinery's Handbook is available: Gunnar sends photos of pages when a second source is needed.

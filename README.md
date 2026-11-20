@@ -3,13 +3,16 @@
 Screw thread tools for the workshop, in English and Icelandic:
 
 - **Measure**: what the micrometer should read over three wires, and whether your part is in tolerance.
-- **Make**: drilling, turning and single-point threading figures, inside and out. *(planned)*
-- **Find**: measure an unknown thread and get a ranked list of what it could be. *(planned)*
+- **Make**: sizes to turn or bore, tap drills with % of thread, and single-point depth and infeed.
+- **Find**: measure an unknown thread and get a ranked list of what it could be, with look-alike
+  warnings and a flank-angle tool that works from two wire sizes.
+
+Thread types: metric ISO, UNC/UNF/UNEF, BSW/BSF, pipe G (BSPP), R (BSPT), NPT and Pg.
 
 **Live:** https://tf5nn.github.io/threadwise/
 
-Threadwise grew out of [Overwire](https://github.com/TF5NN/overwire), which began in 2021 as an
-Excel sheet for the workshop. The plan for the rest is in [`docs/PLAN.md`](docs/PLAN.md).
+Threadwise began in 2021 as an Excel sheet for measuring metric threads over wires in the
+workshop. The plan, and what is left to do, is in [`docs/PLAN.md`](docs/PLAN.md).
 
 > **Disclaimer.** Threadwise is a free hobby project. The calculations are checked against
 > published sources, and the checks are in [`validation/`](validation/), but I take no
@@ -18,14 +21,11 @@ Excel sheet for the workshop. The plan for the rest is in [`docs/PLAN.md`](docs/
 
 ## What works today
 
-The Measure tab, for external 60° threads:
-
-- Metric ISO (ISO 965-1 classes 4h, 5g6g, 6e, 6f, 6g, 6h, 8g) and unified inch
-  (ASME B1.1 classes 1A, 2A, 3A), or your own deviations.
-- The smallest, best and largest wire for the pitch. You type the wire you actually have:
-  it is never assumed.
-- Largest, target and smallest reading over the wires, in mm and inches.
-- Check a reading: in tolerance or not, and how much is left to take off.
+| Tab | Families | Notes |
+|---|---|---|
+| Measure | Metric, UN, BSW/BSF, G, Pg | Wire range worked out from each thread form. BSW/BSF tolerances by hand until BS 84 is sourced. Tapered threads are gauged, not wire-measured. |
+| Make | All eight | Outside and inside limits, tap drills (metric 0.1 mm and fractional inch), radial or compound infeed with a pass schedule, taper data for R and NPT. |
+| Find | All eight | Bolt or hole, pitch by gauge or over N threads, optional flank angle and taper. Ranks, flags look-alikes and twins, never decides. |
 
 ## How accuracy is handled
 
@@ -43,10 +43,13 @@ The Measure tab, for external 60° threads:
 |---|---|
 | `index.html` | The page, and the About text in both languages |
 | `css/style.css` | Looks; the colour block at the top is shared with the other TF5NN apps |
-| `js/threads.js` | Metric and unified tolerances, 60° wire maths |
-| `js/geometry.js` | Wire maths for any flank angle, and the two-wire angle method |
-| `js/iso965-data.js` | ISO 965-1 tables |
-| `js/app.js` | Reads the fields, runs the maths, writes the results |
+| `js/catalogue.js`, `js/data/` | The thread catalogue (251 sizes) and its raw, sourced lists |
+| `js/tolerances.js` | Outside and inside limits for every family |
+| `js/geometry.js` | Wire maths for any flank angle, wire range from the profile, two-wire angle |
+| `js/threads.js` | ISO 965-1 external and ASME B1.1 formulas, number parsing |
+| `js/iso965-data.js`, `js/data/iso965-internal.js` | ISO 965-1 tables |
+| `js/measure.js`, `js/make.js`, `js/find.js` | The three tabs |
+| `js/main.js`, `js/hash.js`, `js/format.js` | Tabs, the address, number formatting |
 | `js/strings.js` | Every short text in English and Icelandic |
 | `js/i18n.js`, `js/lang.js`, `js/theme.js` | Language and theme, shared with Sightline |
 | `test/`, `validation/` | The checks |

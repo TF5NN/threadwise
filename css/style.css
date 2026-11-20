@@ -1061,3 +1061,231 @@ dialog .close:hover {
     transition: none;
   }
 }
+
+/* --- Tabs: Measure, Make, Find ------------------------------------------------------------ */
+
+.tabs {
+  display: flex;
+  gap: 4px;
+  padding: 14px var(--edge) 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.tabs button {
+  min-height: 44px;
+  padding: 8px 18px;
+  border: none;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  margin-bottom: -1px;
+  background: none;
+  color: var(--muted);
+  font-size: 0.95rem;
+  font-weight: 550;
+}
+
+.tabs button:hover {
+  background: none;
+  color: var(--ink);
+}
+
+.tabs button[aria-selected='true'] {
+  color: var(--ink);
+  border-bottom-color: var(--green-dark);
+  font-weight: 650;
+}
+
+/* The pitch of the chosen thread, both ways, under the fields. */
+.pitch-line {
+  margin-top: 10px;
+  font: 500 0.85rem var(--mono);
+  color: var(--text-muted);
+}
+
+.pitch-line:empty {
+  display: none;
+}
+
+.pd.one {
+  grid-template-columns: 1fr;
+}
+
+.fields.four {
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  margin-top: 10px;
+}
+
+.passes-n {
+  margin-top: 12px;
+  max-width: 220px;
+}
+
+/* Tables: passes and tap drills. */
+.table-wrap {
+  overflow-x: auto;
+  margin-top: 10px;
+}
+
+table.data {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+table.data th {
+  text-align: left;
+  font-size: 0.66rem;
+  font-weight: 650;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--line);
+}
+
+table.data td {
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--wash);
+  font-family: var(--mono);
+  white-space: nowrap;
+}
+
+table.data tr.in td {
+  background: var(--tint-strong);
+}
+
+table.data tr.off td {
+  color: var(--text-soft);
+}
+
+/* Fold-out panels (two-wire angle, windows). */
+details.more summary {
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 32px;
+}
+
+details.more summary::-webkit-details-marker {
+  display: none;
+}
+
+details.more summary::before {
+  content: '+';
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  border: 1px solid var(--line-strong);
+  border-radius: 4px;
+  font: 500 14px var(--mono);
+  color: var(--muted);
+}
+
+details.more[open] summary::before {
+  content: '−';
+}
+
+details.more summary h2 {
+  margin: 0;
+}
+
+details.more[open] summary {
+  margin-bottom: 10px;
+}
+
+details.more > button {
+  margin-top: 10px;
+}
+
+/* Find: the candidate list. */
+.cands {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.cand {
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--surface);
+}
+
+.cand.top {
+  border-color: var(--line-accent);
+  background: var(--tint-strong);
+}
+
+.cand.outside {
+  opacity: 0.75;
+}
+
+.cand-head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.cand-head strong {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.cand-angle {
+  margin-left: auto;
+  font: 500 0.8rem var(--mono);
+  color: var(--text-muted);
+}
+
+.badge {
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: var(--tint-grey);
+  color: var(--text-strong);
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.cand-body {
+  margin-top: 4px;
+  font: 400 0.8rem var(--mono);
+  color: var(--text-strong);
+}
+
+.cand-warn,
+.cand-note {
+  margin-top: 6px;
+  padding: 6px 9px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+}
+
+.cand-warn {
+  background: var(--amber-soft);
+  border: 1px solid var(--amber-line);
+  color: var(--amber-ink);
+}
+
+.cand-note {
+  background: var(--tint);
+  color: var(--ink-soft);
+}
+
+@media (max-width: 520px) {
+  .tabs {
+    padding-top: 8px;
+  }
+
+  .tabs button {
+    flex: 1;
+    padding: 8px 6px;
+  }
+}
