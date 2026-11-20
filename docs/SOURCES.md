@@ -13,7 +13,7 @@ A value goes in with one tier-A source, or two independent tier-B/C sources that
 | `ISO965-1:sheet` | A | ISO 965-1 tables for es and Td2, copied cell for cell from Gunnar's 2021–2026 spreadsheet | Metric external tolerances |
 | `ASME-B1.1` | A | ASME B1.1, section 5 formulas (Td2 class 2A, allowance 0.300·Td2) | Unified tolerances |
 | `ASME-B1.1:pub` | B | Published UNC 2A/1A/3A pitch-diameter limits (1/4-20, 3/8-16, 1/2-13) | Check of the formulas |
-| `ThreadCheck-p30` | B | Thread Check Inc., *Thread Measuring Wire Formulas*, catalogue p. 30 | Wire constants for 60°, 55°, 47½°, 29°, 40° |
+| `ThreadCheck-p30` | B | Thread Check Inc., *Thread Measuring Wire Formulas*, catalogue p. 30 | Wire constants for 60°, 55°, 47½°, 29°, 40°; the unsymmetrical (buttress) wire formula and best wire |
 | `IS2643:2005` | A | IS 2643:2005, identical to ISO 228-1:2000, published at law.resource.org (scanned; misreads logged) | G threads |
 | `EE-ISO228` | B | Engineers Edge, External British Pipe Threads table per BS EN ISO 228 | G threads, second source |
 | `EE-Whitworth` | B | Engineers Edge, Whitworth BSW/BSF chart (inches) | BSW, BSF |
@@ -24,12 +24,13 @@ A value goes in with one tier-A source, or two independent tier-B/C sources that
 | `Accu-ISO965` | B | Accu Components, ISO metric thread tolerances, tables 1, 2, 4 | Internal metric tolerances |
 | `ISO965-2:pub` | B | Widely published 6H/6g limits for M5–M12 (as in Machinery's Handbook) | Checks only |
 | `ASME-B1.20.1` | A | NPT formulas E0 = D − (0.05·D + 1.1)·P, E1 = E0 + 0.0625·L1, L2 = (0.80·D + 6.8)·P; Table 2 rows 1/16–1/2 as quoted publicly | NPT, checks |
-| `Toflubok` | B | *Töflubók* (IÐNÚ), the Icelandic edition of Tabellenbuch Metall: pp. 264–272 (threads, tolerances, fasteners), 209, 218, 219 (turning, taper turning, drilling). Photographed by Gunnar, Nov 2026. Edition year still to be noted from the title page. | Third source for metric (DIN 13-1, ISO 965-2 6H/6g), G and R (DIN ISO 228-1, DIN 2999-1, incl. R gauge distances), BSW; only source for Tr (DIN 103); tap drills; all Icelandic terms (`docs/ORDASAFN.md`) |
+| `Toflubok` | B | *Töflubók* (IÐNÚ), the Icelandic edition of Tabellenbuch Metall: pp. 264–272 (threads, tolerances, fasteners), 209, 218, 219 (turning, taper turning, drilling). Photographed by Gunnar, Nov 2026. Edition year still to be noted from the title page. | Third source for metric (DIN 13-1, ISO 965-2 6H/6g), G and R (DIN ISO 228-1, DIN 2999-1, incl. R gauge distances), BSW; only source for Tr (DIN 103), S buttress (DIN 513-1, p. 268) and metric taper (DIN 158-1, p. 266); tap drills; all Icelandic terms (`docs/ORDASAFN.md`) |
+| `Taps-M60` | C | Walter (M60×5.5 tap, "drill bit size 54.50 mm", via Zoro) and BAER (M60×5.5 hand tap, 54.5 mm) | M60 tap drill (the book was read as 55) |
 | `MH31` | B | Machinery's Handbook, 31st edition | Cross-checks for all families |
 | `Heyco-PG` | C | Heyco DIN 40430 specification sheet (basic and limit sizes) | Pg |
 | `REMS-tables` | C | REMS thread tables (Pg, G, NPT, R basic sizes) | Pg, pipe threads |
 | `Hummel-PG` | C | Hummel thread-type overview | Pg |
 
 Still to find (see PLAN.md, "Risks"): a source for BS 84 (BSW/BSF) tolerances; ISO 2903 (Tr)
-tolerances; a second source for the G internal minor-diameter tolerance at 11 TPI; ASME B1.1
+tolerances; DIN 513-2/-3 (S) tolerances; DIN 158 gauge tolerances; a second source for the DIN 158 and DIN 513 tables; a second source for the G internal minor-diameter tolerance at 11 TPI; ASME B1.1
 internal minor-diameter tolerances.

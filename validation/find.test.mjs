@@ -4,7 +4,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { CATALOGUE } from '../js/catalogue.js';
-import { rank, defaultWindows, threadsToTell } from '../js/find.js';
+import { rank, defaultWindows, threadsToTell, snapTwoWire } from '../js/find.js';
+import { overWires, angleFromTwoWires } from '../js/geometry.js';
 
 // A small deterministic random generator, so the test gives the same result every run.
 let seed = 12345;
@@ -25,6 +26,8 @@ for (const side of ['ext', 'int']) {
     let top3 = 0;
     const misses = [];
     for (const row of CATALOGUE) {
+      // Find lists DIN 158 once (not the short version) and only as a bolt.
+      if (row.short || (row.family === 'MK' && side === 'int')) continue;
       for (let k = 0; k < 5; k++) {
         const base = side === 'ext' ? row.d : row.d1;
         const w = defaultWindows(side, base);
@@ -62,4 +65,25 @@ test('pipe threads: a 21 mm bolt with 14 TPI is G 1/2 or R 1/2, not something ca
 
 test('look-alike pitch arithmetic: 1.5 mm vs 16 TPI drift half a pitch apart in 9 threads', () => {
   assert.equal(threadsToTell(1.5, 25.4 / 16), 9);
+});
+
+test('S and Tr of the same size are twins; the two-wire ratio tells them apart', () => {
+  const r = rank({ side: 'ext', d: 39.8, pitch: 7, minus: 1.2, plus: 0.4, taper: 'parallel' });
+  const s = r.inside.find((x) => x.row.name === 'S 40 × 7');
+  assert.ok(s.twins.some((x) => x.row.name === 'Tr 40 × 7'));
+  // Two wires over an S thread snap to S (33), over a Tr thread to Tr (30).
+  const kOf = (angle) => angleFromTwoWires(overWires(34.75, 7, 3.6, angle), 3.6, overWires(34.75, 7, 4.2, angle), 4.2).k;
+  assert.equal(snapTwoWire(kOf([3, 30])), 33);
+  assert.equal(snapTwoWire(kOf(30)), 30);
+  assert.equal(snapTwoWire(kOf(60)), 60);
+  // With the angle set to S, Tr drops out.
+  const rS = rank({ side: 'ext', d: 39.8, pitch: 7, minus: 1.2, plus: 0.4, angle: 33, taper: 'parallel' });
+  assert.ok(!rS.inside.some((x) => x.row.family === 'Tr'));
+});
+
+test('DIN 158 shows up once, as a tapered bolt, and never as a hole', () => {
+  const ext = rank({ side: 'ext', d: 9.95, pitch: 1, minus: 0.3, plus: 0.1, taper: 'taper' });
+  assert.equal(ext.inside.filter((x) => x.row.family === 'MK' && x.row.d === 10).length, 1);
+  const int = rank({ side: 'int', d: 9.0, pitch: 1, minus: 0.1, plus: 0.4, taper: 'any' });
+  assert.ok(!int.inside.some((x) => x.row.family === 'MK'));
 });

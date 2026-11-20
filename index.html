@@ -208,7 +208,7 @@
             <p class="pitch-line" id="k-pitch"></p>
           </section>
 
-          <section class="panel" aria-labelledby="k-cut-title">
+          <section class="panel" id="k-cut-panel" aria-labelledby="k-cut-title">
             <h2 id="k-cut-title" data-i18n="make.cutTitle">Single-point threading</h2>
             <div class="row first">
               <div class="seg" role="radiogroup" aria-label="Infeed" data-i18n-attr="aria-label:make.feed" id="k-feed">
@@ -222,6 +222,7 @@
               <div id="k-travel-row"><dt data-i18n="make.travel">Total on the compound dial</dt><dd id="k-travel"></dd></div>
             </dl>
             <p class="note quiet" data-i18n="make.compoundNote">The compound angle is measured from the cross-slide direction: half the thread angle less ½°, so the trailing flank only shaves. Some compounds are marked so that 29.5° reads 60.5°.</p>
+            <p class="note warn" id="k-s-feed" hidden data-i18n="make.sFeed">S thread (3°/30°): the compound is set along the 30° flank, so the steep 3° side does the cutting. This follows from the geometry; I have no source for it yet, so check your insert maker's advice.</p>
             <div class="fields passes-n">
               <label><span data-i18n="make.passes">Number of passes</span><input id="k-n" inputmode="numeric" autocomplete="off" /></label>
             </div>
@@ -246,6 +247,7 @@
             </div>
             <dl class="pd one" id="k-sizes"></dl>
             <p class="note" id="k-source"></p>
+            <p class="note info" id="k-mk-int" hidden></p>
           </section>
 
           <section class="panel" id="k-drill-panel" aria-labelledby="k-drill-title" hidden>
@@ -316,6 +318,7 @@
                   <option value="60">60° (metric, UN, NPT)</option>
                   <option value="80">80° (Pg)</option>
                   <option value="30">30° (Tr)</option>
+                  <option value="33">3°/30° (S)</option>
                 </select>
               </label>
             </div>
@@ -387,7 +390,7 @@
 
       <div data-only="en" lang="en">
         <h2 id="about-title">About Threadwise</h2>
-        <p>Threadwise is three workshop tools in one, all reading from one catalogue of threads: metric ISO, unified inch (UNC, UNF, UNEF), Whitworth (BSW, BSF), pipe threads (G, R, NPT), Pg and metric trapezoidal (Tr).</p>
+        <p>Threadwise is three workshop tools in one, all reading from one catalogue of threads: metric ISO, unified inch (UNC, UNF, UNEF), Whitworth (BSW, BSF), pipe threads (G, R, NPT), metric taper (DIN 158, for grease nipples and plugs), Pg, metric trapezoidal (Tr) and metric buttress (S).</p>
         <h3>The three tabs</h3>
         <ul>
           <li><b>Measure:</b> what the micrometer should read over three wires, for any parallel thread, and whether a part you have measured is in tolerance.</li>
@@ -403,8 +406,9 @@
         </ul>
         <h3>Good to know</h3>
         <ul>
-          <li>Tapered threads (R, NPT) are accepted with ring and plug gauges, so Measure covers parallel threads only.</li>
-          <li>Whitworth (BSW, BSF) and trapezoidal (Tr) tolerances are not in yet: Measure takes them by hand.</li>
+          <li>Tapered threads (R, NPT and the DIN 158 metric taper) are accepted with ring and plug gauges, so Measure covers parallel threads only.</li>
+          <li>Whitworth (BSW, BSF), trapezoidal (Tr) and buttress (S) tolerances are not in yet: Measure takes them by hand.</li>
+          <li>The S buttress thread has flanks of 3° and 30°, so its wire formula has both angles in it: M = d2 + G·(1 + cos(13.5°)/sin(16.5°)) − P/(tan 3° + tan 30°), the same as Thread Check's formula for unsymmetrical threads.</li>
           <li>The usual wire formulas leave out the lead angle. That is fine up to about 5°; the app warns above that.</li>
           <li>The reading also depends on the measuring force and on the true size of your wires.</li>
           <li>Numbers typed with a comma or a point both work.</li>
@@ -420,7 +424,7 @@
 
       <div data-only="is" lang="is">
         <h2>Um Threadwise</h2>
-        <p>Threadwise eru þrjú verkstæðistól í einu, sem öll lesa úr einni gengjuskrá: metra ISO-gengjur, tommugengjur (UNC, UNF, UNEF), Whitworth (BSW, BSF), rörasnitti (G, R, NPT), Pg og metra trapisugengjur (Tr).</p>
+        <p>Threadwise eru þrjú verkstæðistól í einu, sem öll lesa úr einni gengjuskrá: metra ISO-gengjur, tommugengjur (UNC, UNF, UNEF), Whitworth (BSW, BSF), rörasnitti (G, R, NPT), keilulaga metra utangengjur (DIN 158, fyrir smurkoppa og tappa), Pg, metra trapisugengjur (Tr) og sagarsnitti (S).</p>
         <h3>Fliparnir þrír</h3>
         <ul>
           <li><b>Mæla:</b> hvað míkrómælirinn á að sýna yfir þrjá víra, fyrir allar sívalar gengjur, og hvort stykki sem þú hefur mælt sé innan málviks.</li>
@@ -436,8 +440,9 @@
         </ul>
         <h3>Gott að vita</h3>
         <ul>
-          <li>Keilulaga snitti (R, NPT) eru samþykkt með hring- og tappamælum, svo Mæla nær aðeins yfir sívalar gengjur.</li>
-          <li>Málvik fyrir Whitworth (BSW, BSF) og trapisugengjur (Tr) eru ekki komin inn: í Mæla eru þau slegin inn handvirkt.</li>
+          <li>Keilulaga snitti (R, NPT og keilulaga metra utangengjur DIN 158) eru samþykkt með hring- og tappamælum, svo Mæla nær aðeins yfir sívalar gengjur.</li>
+          <li>Málvik fyrir Whitworth (BSW, BSF), trapisugengjur (Tr) og sagarsnitti (S) eru ekki komin inn: í Mæla eru þau slegin inn handvirkt.</li>
+          <li>Sagarsnitti (S) hafa gengjufleti með 3° og 30° halla, svo víraformúlan hefur bæði hornin: M = d2 + G·(1 + cos(13,5°)/sin(16,5°)) − P/(tan 3° + tan 30°), sama og formúla Thread Check fyrir ósamhverfar gengjur.</li>
           <li>Venjulegu víraformúlurnar sleppa stigningarhorninu. Það er í lagi upp að um 5°; forritið varar við ef það fer yfir.</li>
           <li>Mælingin fer líka eftir mælikrafti og raunstærð víranna.</li>
           <li>Það má slá tölur inn með kommu eða punkti.</li>

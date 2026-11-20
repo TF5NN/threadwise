@@ -78,3 +78,65 @@ test('Whitworth wire range: the rounded form narrows it, and the best wire sits 
   near(r.min, 0.5057, 1e-4, 'min'); // top of wire level with the rounded crest
   near(r.max, 0.8527, 1e-4, 'max'); // contact where the crest rounding starts
 });
+
+// ---- Asymmetric flanks: the S buttress thread (DIN 513, 3° and 30° from the radial) --------
+
+/**
+ * An independent check: put a wire in a 3°/30° groove by solving "touches both flanks"
+ * numerically (bisection), then read the height of its top. No closed formula used.
+ */
+function wireByBisection(e, pitch, wire, a1deg, a2deg) {
+  const a1 = (a1deg * Math.PI) / 180;
+  const a2 = (a2deg * Math.PI) / 180;
+  const r = wire / 2;
+  // Pitch line at y = 0; the groove spans x = 0 … P/2 there and widens outwards (y up).
+  // Left flank: x = −y·tan a1. Right flank: x = P/2 + y·tan a2.
+  const gapRight = (cy) => {
+    const cx = r / Math.cos(a1) - cy * Math.tan(a1); // distance r from the left flank
+    return (pitch / 2 + cy * Math.tan(a2) - cx) * Math.cos(a2) - r; // distance from the right one, minus r
+  };
+  let lo = -10 * pitch;
+  let hi = 10 * pitch;
+  for (let i = 0; i < 200; i++) {
+    const mid = (lo + hi) / 2;
+    if (gapRight(mid) > 0) hi = mid; else lo = mid;
+  }
+  return e + 2 * ((lo + hi) / 2 + r);
+}
+
+test('S thread: the asymmetric wire formula agrees with a wire placed by bisection', () => {
+  for (const [pitch, wire] of [[2, 1.0], [7, 3.8], [10, 5.5], [12, 6.0]]) {
+    const e = 40;
+    near(overWires(e, pitch, wire, [3, 30]), wireByBisection(e, pitch, wire, 3, 30), 1e-9, `P ${pitch}, G ${wire}`);
+  }
+  // And it falls back to the symmetric formula when both flanks are equal.
+  near(overWires(10, 1.5, 0.866, [30, 30]), overWires(10, 1.5, 0.866, 60), 1e-12, 'symmetric case');
+});
+
+test('S thread: best wire 0.5431·P, as in Thread Check, and it touches the 30° flank on the pitch line', () => {
+  near(bestWire(1, [3, 30]), 0.5431, 5e-5, 'best wire factor');
+  const r = bestWire(1, [3, 30]) / 2;
+  const { kG, kP } = wireConstants([3, 30]);
+  const centre = r * (kG - 1); // above the sharp groove bottom
+  near(centre - r * Math.sin(Math.PI / 6), 0.5 * kP, 1e-9, 'contact height = pitch line');
+});
+
+test('S thread: the profile numbers match DIN 513 (profile width w, root position)', () => {
+  const t = Math.tan((3 * Math.PI) / 180) + Math.tan((30 * Math.PI) / 180);
+  // Thread width at the crest: w = 0.26384·P (DIN 513-1).
+  near(0.5 - 0.375 * t, 0.26384, 1e-5, 'w');
+  // The root radius R = 0.12427·P, tangent to both flanks, bottoms out at h3 = 0.86777·P below the crest.
+  const R = 0.124271;
+  const { kG } = wireConstants([3, 30]);
+  const bottom = 0.5 / t - R * (kG - 1 - 1); // pitch line to the bottom of the rounding
+  near(0.375 + bottom, 0.867767, 2e-5, 'h3');
+});
+
+test('S thread: two wires give the equivalent angle of about 34° (ratio 4.4237)', () => {
+  const p = 7;
+  const m1 = overWires(34.75, p, 3.5, [3, 30]);
+  const m2 = overWires(34.75, p, 4.2, [3, 30]);
+  const r = angleFromTwoWires(m1, 3.5, m2, 4.2);
+  near(r.k, 4.42365, 1e-4, 'ratio');
+  near(r.angle, 33.966, 2e-3, 'equivalent angle');
+});

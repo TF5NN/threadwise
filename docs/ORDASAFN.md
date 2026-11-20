@@ -25,14 +25,14 @@ changes, change it in `js/strings.js` (and `index.html` for the About box) in th
 | röð 1, röð 2 | first choice, second choice (sizes) | | 265 | |
 | sívöl gengja | parallel (cylindrical) thread | | 264, 267 | ✓ |
 | keilulaga gengja | tapered thread | | 264, 266 | ✓ |
-| keilulaga metra utangengja | metric taper external thread (grease nipples, plugs) | DIN 158 | 266 | |
+| keilulaga metra utangengja | metric taper external thread (grease nipples, plugs) | DIN 158 | 266 | ✓ |
 | rörasnitti | pipe thread | G, R, Rp | 267 | ✓ |
 | rörasnitti fyrir þéttandi tengingar sem ekki eru í snittinu | pipe thread, pressure-tight joint NOT made on the thread | G | 264, 267 | |
 | rörasnitti fyrir snitti með þéttandi tengingum | pipe thread, pressure-tight joint made on the thread | R, Rp | 264, 267 | |
 | málviksflokkur A (meðal), B (grófur) | tolerance class A (medium), B (coarse) for G | | 267 | |
 | Whitworth-snitti | Whitworth thread (marked *óstaðlað*, not standardised, in the book) | | 269 | ✓ |
 | trapisugengja, metra ISO-trapisugengjur | trapezoidal thread | Tr | 264, 268 | ✓ |
-| sagarskrúfa, sagarsnitti | buttress (saw-tooth) thread | S | 264, 268 | |
+| sagarskrúfa, sagarsnitti | buttress (saw-tooth) thread | S | 264, 268 | ✓ sagarsnitti |
 | bugðugengja | round thread | Rd | 264 | |
 | boddískrúfa | sheet-metal (self-tapping) screw | ST | 264 | |
 | kúlugengja, kúluskrúfa | ball screw | | 269 | |
@@ -57,18 +57,20 @@ changes, change it in `js/strings.js` (and `index.html` for the About box) in th
 | topphorn, gengjuhorn, skrúfuhalli | thread (included flank) angle | | 265, 268, 269 | ✓ gengjuhorn |
 | gengjudýpt, dýpt boltagengju / róargengju | thread depth, external / internal | h3, H1 | 265, 268 | ✓ |
 | snittisdýpt, skrúfudýpt | thread depth (pipe, Whitworth) | h1 | 267, 269 | |
-| samliggjandi gengjufletir | flank overlap | H1 | 268 | |
+| samliggjandi gengjufletir | flank overlap | H1 | 268 | ✓ |
 | gengjuflötur, gengjufletir | flank, flanks | | 268 | ✓ |
 | hæð grunnþríhyrnings | height of the fundamental triangle | H | 267 | |
 | radíi, rúningur | root/crest radius | R, r | 265, 267, 268 | |
 | toppfrígangur | crest clearance | ac | 268 | |
+| öxulfrígangur | axial clearance (S thread) | a | 268 | ✓ |
+| prófílbreidd | width of the thread at the crest (S thread) | w | 268 | |
 | rennistálsbreidd | tool tip width | b | 268 | ✓ |
 | spennuþversnið | tensile stress area | S | 265 | |
 | þvermál kjarnagatsbors | tap drill diameter | | 265 | ✓ kjarnagatsbor |
 | gengjuöxull, snittisöxull | thread axis | | 266, 267 | |
 | viðmiðunarflötur | gauge plane (reference plane) | | 266, 267 | ✓ |
 | fjarlægð viðmiðunarflatar | gauge distance from the end | a | 266, 267 | ✓ |
-| prófunarflötur | test plane | | 266 | |
+| prófunarflötur | test plane | | 266 | ✓ |
 | nothæf gengjulengd, nothæf snittislengd | useful thread length | l1 | 266, 267 | ✓ |
 | nafnvídd röra | nominal pipe size | DN | 267 | ✓ |
 | keiluhlutfall | taper ratio | C | 218 | ✓ |

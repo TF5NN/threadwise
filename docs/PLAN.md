@@ -48,7 +48,10 @@ holds the proof (`validation/`), and the app says which kind of number you are l
 | Pipe, taper R / Rc / Rp (BSPT) | ISO 7-1 | 55° | 1:16 | – (see below) | ✓ | ✓ | gauge-based |
 | NPT | ASME B1.20.1 | 60° | 1:16 | – (see below) | ✓ | ✓ | gauge-based |
 | Pg (steel conduit) | DIN 40430 | 80° | – | ✓ | ✓ | ✓ | manufacturer tables, labelled |
-| Later: Tr, ACME, BA, UNS | ISO 2904, ASME B1.5, BS 93 | 30°, 29°, 47½° | – | later | later | later | – |
+| Metric trapezoidal (Tr) | DIN 103 | 30° | – | ✓ (manual tol.) | ✓ | ✓ | ISO 2903 (to source) |
+| Metric taper (DIN 158) | DIN 158-1 | 60° | 1:16 | – (tapered) | ✓ | ✓ (bolts) | gauge-based |
+| Metric buttress (S) | DIN 513-1 | 3°/30° | – | ✓ (manual tol.) | ✓ | ✓ | DIN 513-2/-3 (to source) |
+| Later: ACME, BA, UNS | ASME B1.5, BS 93 | 29°, 47½° | – | later | later | later | – |
 
 **Why tapered threads are not in Measure (at first):** a tapered thread is accepted with
 L1 ring and plug gauges ("hand-tight plus or minus one turn"), not with a pitch-diameter
@@ -66,19 +69,20 @@ BSP tapered. The app shows both names: "G 1/2 (BSPP)".
 | Phase | State |
 |---|---|
 | 0 Foundation | ✓ Done: three tabs, address state, disclaimer, CI with validation |
-| 1 Catalogue | ✓ Done: 251 sizes in 8 families, every row sourced and checked |
+| 1 Catalogue | ✓ Done: 348 rows in 11 families (DIN 158 counted in both lengths), every row sourced and checked |
 | 2 Measure | ✓ Done for metric, UN, G, Pg; BSW/BSF with manual tolerance (BS 84 not sourced) |
 | 3 Find | ✓ Done: ranking, look-alikes, twins, two-wire angle tool, 2510-reading validation |
 | 4 Make | ✓ Done: limits, tap drills, radial/compound infeed, passes, taper data. Gaps listed below |
-| 5 Later | Started: Tr (trapezoidal) added from the Töflubók; R gauge distances in |
+| 5 Later | Started: Tr, S (DIN 513) and DIN 158 metric taper added from the Töflubók; R gauge distances in; asymmetric (two-flank) wire maths |
 
 **Still open** (each needs a source before it goes in):
 - BS 84 tolerances for BSW/BSF (Measure and Make show basic sizes until then).
 - Second source for the G internal minor-diameter tolerance at 11 TPI (`DISCREPANCIES.md`).
 - Tap drills for tapered threads. (R gauge distances: done, Töflubók p. 267.)
-- ISO 2903 tolerances for Tr; DIN 158 metric taper threads (grease nipples) and S (buttress)
-  threads, both in the Töflubók (p. 266, 268).
-- The Töflubók's edition year (title page), and a second look at its M60 tap drill (55 mm?).
+- ISO 2903 tolerances for Tr; DIN 513-2/-3 tolerances for S; a second source for the DIN 158
+  and DIN 513 tables (one source each so far, checked against their own formulas).
+- A source for the compound setting on S threads (Make uses 29.5° along the 30° flank, from the geometry).
+- The Töflubók's edition year (title page). (M60 tap drill settled at 54.5 mm from tap makers' data.)
 - ASME B1.1 internal minor-diameter tolerance (Make shows the minimum only).
 - DIN 76 thread undercuts.
 - Bench-measured parts for `validation/find-bench.csv`.

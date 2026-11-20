@@ -3,7 +3,7 @@
 
 import { t } from './i18n.js';
 import { CATALOGUE, FAMILIES } from './catalogue.js';
-import { angleFromTwoWires, angleUncertainty } from './geometry.js';
+import { angleFromTwoWires, angleUncertainty, wireConstants } from './geometry.js';
 import { parseNumber } from './threads.js';
 import { num, len, toMm, local, setSeg, wireSeg, pitchBoth, MM_PER_INCH } from './format.js';
 import * as hash from './hash.js';
@@ -40,6 +40,10 @@ const TAPER_EXTRA = 1.0;
 export function rank(q) {
   const scored = [];
   for (const row of CATALOGUE) {
+    // DIN 158 short versions have the same diameters and pitch as the normal ones: list once.
+    if (row.short) continue;
+    // DIN 158 is external only; its fittings screw into ordinary parallel M holes.
+    if (row.family === 'MK' && q.side === 'int') continue;
     if (q.taper === 'parallel' && row.taper) continue;
     if (q.taper === 'taper' && !row.taper) continue;
     if (q.angle && Math.abs(row.angle - q.angle) > (q.angleTol ?? 2)) continue;
@@ -73,6 +77,17 @@ export function rank(q) {
   }
   return { inside, closest: inside.length ? [] : scored.slice(0, 3) };
 }
+
+/** The angle as people write it: 60°, 27.5°, or 3°/30° for the S thread. */
+export const angleText = (row) => (row.flanks ? `${row.flanks[0]}°/${row.flanks[1]}°` : `${num(row.angle, row.angle % 1 ? 1 : 0)}°`);
+
+/**
+ * The catalogue angles a two-wire result can snap to, by the ratio k = ΔM/ΔG that the two
+ * wires really give: 30° Tr, 3°/30° S (k = 4.42, looks like 34°), 55°, 60°, 80°.
+ * Snapping on k, not on the angle, keeps S and Tr apart where they are close.
+ */
+const SNAP = [[30, 30], [33, [3, 30]], [55, 55], [60, 60], [80, 80]].map(([value, a]) => ({ value, k: wireConstants(a).kG }));
+export const snapTwoWire = (k) => SNAP.reduce((a, b) => (Math.abs(b.k - k) < Math.abs(a.k - k) ? b : a)).value;
 
 /** Over how many threads two pitches drift apart by half a pitch: where a gauge visibly rocks. */
 export const threadsToTell = (p1, p2) => Math.ceil((0.5 * Math.min(p1, p2)) / Math.abs(p1 - p2));
@@ -143,7 +158,8 @@ function render() {
     twBox.className = 'note ' + (tw.error || tw.odd ? 'warn' : 'info');
     twBox.textContent = tw.error
       ? t(tw.error, tw)
-      : t('find.twResult', { angle: num(tw.angle, 1), sigma: num(tw.sigma, 1) }) + (tw.odd ? ' ' + t('find.twOdd') : '');
+      : t('find.twResult', { angle: num(tw.angle, 1), sigma: num(tw.sigma, 1) }) + (tw.odd ? ' ' + t('find.twOdd') : '') +
+        (!tw.odd && Math.abs(tw.angle - 33.97) < 2 ? ' ' + t('find.twS') : '');
     $('f-tw-use').hidden = !!tw.error || tw.odd;
   }
 
@@ -187,7 +203,7 @@ function render() {
     const fam = FAMILIES[r.family];
     const head = document.createElement('div');
     head.className = 'cand-head';
-    head.innerHTML = `<span class="badge">${t('famShort.' + r.family)}</span><strong></strong><span class="cand-angle">${num(r.angle, r.angle % 1 ? 1 : 0)}°${r.taper ? ' · ' + t('find.tapered') : ''}</span>`;
+    head.innerHTML = `<span class="badge">${t('famShort.' + r.family)}</span><strong></strong><span class="cand-angle">${angleText(r)}${r.taper ? ' · ' + t('find.tapered') : ''}</span>`;
     head.querySelector('strong').textContent = r.name + (r.alias ? ` (${r.alias})` : '');
     const body = document.createElement('div');
     body.className = 'cand-body';
@@ -208,8 +224,14 @@ function render() {
     for (const twin of (s.twins || []).slice(0, 2)) {
       const warn = document.createElement('div');
       warn.className = 'cand-warn';
-      warn.textContent = t('find.twin', { other: twin.row.name, a: num(r.angle, r.angle % 1 ? 1 : 0), b: num(twin.row.angle, twin.row.angle % 1 ? 1 : 0) });
+      warn.textContent = t('find.twin', { other: twin.row.name, a: angleText(r), b: angleText(twin.row) });
       li.append(warn);
+    }
+    if (r.family === 'MK') {
+      const note = document.createElement('div');
+      note.className = 'cand-note';
+      note.textContent = t('find.mkNote', { d: num(r.d, 0), p: num(r.pitch, r.pitch % 1 ? 1 : 0) });
+      li.append(note);
     }
     if (r.family === 'G' || r.family === 'R' || r.family === 'NPT') {
       const note = document.createElement('div');
@@ -239,9 +261,8 @@ export function init() {
   $('f-tw-use').addEventListener('click', () => {
     const tw = twoWire();
     if (!tw || tw.error) return;
-    // Snap to the nearest standard angle the catalogue knows.
-    const angles = [30, 55, 60, 80];
-    state.angle = String(angles.reduce((a, b) => (Math.abs(b - tw.angle) < Math.abs(a - tw.angle) ? b : a)));
+    // Snap to the nearest standard angle the catalogue knows (by the wire ratio).
+    state.angle = String(snapTwoWire(tw.k));
     render();
   });
   $('f-reset').addEventListener('click', () => {

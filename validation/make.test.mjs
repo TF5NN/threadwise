@@ -45,3 +45,21 @@ test('pass schedule ends exactly at full depth and the passes shrink', () => {
   near(p[p.length - 1].cum, 0.92, 1e-12, 'last');
   for (let i = 1; i < p.length; i++) assert.ok(p[i].step < p[i - 1].step);
 });
+
+test('S buttress: depths from the DIN 513 table, compound along the 30° flank, 100 % thread at D1', () => {
+  const s = row('S 40 × 7');
+  const ext = infeed(s, 'ext');
+  near(ext.depth, 6.074, 1e-9, 'h3');
+  near(ext.compound, 29.5, 1e-9, 'compound');
+  near(infeed(s, 'int').depth, 5.25, 1e-9, 'H1');
+  near(percentThread(s, 29.5), 100, 1e-9, 'drill at D1 = 100 %');
+  // Drills are offered around 75 %, i.e. well above D1, for the nut.
+  assert.ok(drillChoices(s, null).some((d) => d.sys === 'mm' && Math.abs(d.pct - 75) < 2));
+});
+
+test('DIN 158: infeed is the ISO 60° depth; the book h3 max is not exceeded', () => {
+  const m = CATALOGUE.find((r) => r.id === 'MK:10x1');
+  const f = infeed(m, 'ext');
+  near(f.compound, 29.5, 1e-9, 'compound');
+  assert.ok(f.depth <= m.h3max, `${f.depth} vs h3 max ${m.h3max}`);
+});

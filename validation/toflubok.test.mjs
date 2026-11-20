@@ -4,8 +4,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { CATALOGUE, FORMS, family } from '../js/catalogue.js';
-import { limits } from '../js/tolerances.js';
-import { PIPE_G, TRAPEZ, TR_PRINTED } from '../js/data/catalogue-data.js';
+import { limits, isoInternal } from '../js/tolerances.js';
+import { PIPE_G, TRAPEZ, TR_PRINTED, TAP_DRILL_COARSE, BUTTRESS, METRIC_TAPER, METRIC_TAPER_TEST_PRINTED } from '../js/data/catalogue-data.js';
 
 const near = (a, b, tol, what) => assert.ok(Math.abs(a - b) <= tol, `${what}: ${a} vs ${b} (±${tol})`);
 const row = (n) => CATALOGUE.find((r) => r.name === n);
@@ -115,8 +115,11 @@ test('p. 265: the book\'s tap drills sit inside the 6H minor-diameter limits (on
     const m = limits(r, 'int', '6H').minor;
     if (r.tapDrill < m.min - 1e-9 || r.tapDrill > m.max + 1e-9) outside.push(r.name);
   }
-  // M60: the book prints 55 mm; the 6H limits are 54.046–54.796 mm. Logged in DISCREPANCIES.
-  assert.deepEqual(outside, ['M60']);
+  // M60 was read as 55 mm from the photo of the book; the 6H limits are 54.046–54.796 mm and
+  // tap makers (Walter, BAER) give 54.5 mm, so 54.5 is used. Logged in DISCREPANCIES.
+  assert.deepEqual(outside, []);
+  assert.equal(TAP_DRILL_COARSE[60], 54.5);
+  assert.ok(55 > isoInternal(60, 5.5, '6H').minor.max, 'the printed 55 really is outside 6H');
 });
 
 // ---- p. 267, DIN ISO 228-1 (2001-04): G threads, a third source ----------------------------------
@@ -186,4 +189,39 @@ test('p. 269: the 3" BSW pitch diameter as printed (72.56) is a misprint, caught
   const r = row('3 BSW');
   assert.ok(Math.abs(r.d2 - 72.56) > 1, 'printed value must not fit');
   near(76.2 - 0.64 * (25.4 / 3.5), 71.555, 0.001, 'book formula');
+});
+
+// ---- DIN 513-1 S buttress, Töflubók p. 268 -----------------------------------------------------
+test('S (DIN 513): every printed size follows the DIN 513 formulas', () => {
+  for (const [d, p, d3, h3, D1, H1, R] of BUTTRESS) {
+    near(h3, 0.867767 * p, 6e-4, `S${d}×${p} h3`);
+    near(d3, d - 2 * h3, 1e-9, `S${d}×${p} d3 = d − 2·h3 (from the rounded h3)`);
+    near(D1, d - 1.5 * p, 1e-9, `S${d}×${p} D1`);
+    near(H1, 0.75 * p, 1e-9, `S${d}×${p} H1`);
+    near(R, 0.124271 * p, 6e-4, `S${d}×${p} R`);
+  }
+  assert.equal(family('S').length, 24);
+});
+
+// ---- DIN 158-1 metric taper, Töflubók p. 266 ---------------------------------------------------
+test('DIN 158: printed test-plane diameters = gauge-plane ISO sizes + (b − a)/16', () => {
+  for (const [key, [dT, d2T, d3T]] of Object.entries(METRIC_TAPER_TEST_PRINTED)) {
+    const [p, d] = key.split(':').map(Number);
+    const row = CATALOGUE.find((r) => r.id === `MK:${d}x${p}`);
+    assert.ok(row, key);
+    // The book adds the step to the rounded DIN 13 sizes (M12×1.5: 11.026 + 0.1875 = 11.2135 →
+    // 11.214), so allow two roundings: 1 µm.
+    near(row.dTest, dT, 6e-4, `${row.name} d′`);
+    near(row.d2Test, d2T, 1.0001e-3, `${row.name} d2′`);
+    near(row.d3Test, d3T, 1.0001e-3, `${row.name} d3′`);
+  }
+});
+
+test('DIN 158: the short version is shorter and its planes nearer the end; h3 max is deeper than the ISO root', () => {
+  for (const [p, l1, l1s, h3, h3s, a, as, b, bs] of METRIC_TAPER) {
+    assert.ok(l1s < l1 && as < a && bs < b, `P ${p} short version`);
+    assert.ok(h3 >= 0.613435 * p && h3s >= 0.613435 * p, `P ${p} h3 max ≥ h3 basic`);
+    assert.ok(b - a > 0 && bs - as > 0, `P ${p} test plane further in than the gauge plane`);
+  }
+  assert.equal(family('MK').length, 52); // 26 sizes, normal and short
 });

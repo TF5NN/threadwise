@@ -7,8 +7,8 @@ Screw thread tools for the workshop, in English and Icelandic:
 - **Find**: measure an unknown thread and get a ranked list of what it could be, with look-alike
   warnings and a flank-angle tool that works from two wire sizes.
 
-Thread types: metric ISO, UNC/UNF/UNEF, BSW/BSF, pipe G (BSPP), R (BSPT), NPT, Pg and metric
-trapezoidal (Tr). The Icelandic follows the *Töflubók*; see [`docs/ORDASAFN.md`](docs/ORDASAFN.md).
+Thread types: metric ISO, UNC/UNF/UNEF, BSW/BSF, pipe G (BSPP), R (BSPT), NPT, metric taper
+(DIN 158, grease nipples and plugs), Pg, metric trapezoidal (Tr) and metric buttress (S, DIN 513). The Icelandic follows the *Töflubók*; see [`docs/ORDASAFN.md`](docs/ORDASAFN.md).
 
 **Live:** https://tf5nn.github.io/threadwise/
 
@@ -24,9 +24,9 @@ workshop. The plan, and what is left to do, is in [`docs/PLAN.md`](docs/PLAN.md)
 
 | Tab | Families | Notes |
 |---|---|---|
-| Measure | Metric, UN, BSW/BSF, G, Pg, Tr | Wire range worked out from each thread form. BSW/BSF and Tr tolerances by hand until BS 84 / ISO 2903 are sourced. Tapered threads are gauged, not wire-measured. |
-| Make | All nine | Outside and inside limits, tap drills (metric 0.1 mm and fractional inch, with the Töflubók's drill marked ★), radial or compound infeed with a pass schedule, taper data for R (gauge distance, useful length) and NPT. |
-| Find | All nine | Bolt or hole, pitch by gauge or over N threads, optional flank angle and taper. Ranks, flags look-alikes and twins, never decides. |
+| Measure | Metric, UN, BSW/BSF, G, Pg, Tr, S | Wire range worked out from each thread form; S uses the two-flank (3°/30°) wire formula. BSW/BSF, Tr and S tolerances by hand until BS 84 / ISO 2903 / DIN 513 are sourced. Tapered threads (R, NPT, DIN 158) are gauged, not wire-measured. |
+| Make | All eleven | Outside and inside limits, tap drills (metric 0.1 mm and fractional inch, with the Töflubók's drill marked ★), radial or compound infeed with a pass schedule, taper data for R (gauge distance, useful length), NPT and DIN 158 (gauge and test planes). |
+| Find | All eleven | Bolt or hole, pitch by gauge or over N threads, optional flank angle and taper. Ranks, flags look-alikes and twins, never decides. |
 
 ## How accuracy is handled
 
@@ -44,7 +44,7 @@ workshop. The plan, and what is left to do, is in [`docs/PLAN.md`](docs/PLAN.md)
 |---|---|
 | `index.html` | The page, and the About text in both languages |
 | `css/style.css` | Looks; the colour block at the top is shared with the other TF5NN apps |
-| `js/catalogue.js`, `js/data/` | The thread catalogue (272 sizes) and its raw, sourced lists |
+| `js/catalogue.js`, `js/data/` | The thread catalogue (348 rows, 11 families) and its raw, sourced lists |
 | `docs/ORDASAFN.md` | Icelandic–English dictionary of thread and workshop terms, from the Töflubók |
 | `js/tolerances.js` | Outside and inside limits for every family |
 | `js/geometry.js` | Wire maths for any flank angle, wire range from the profile, two-wire angle |

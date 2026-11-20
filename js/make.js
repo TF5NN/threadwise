@@ -10,7 +10,7 @@ import * as hash from './hash.js';
 
 const $ = (id) => document.getElementById(id);
 const P = 'k.';
-export const MAKE_FAMILIES = ['M', 'UN', 'BSW', 'BSF', 'G', 'R', 'NPT', 'Pg', 'Tr'];
+export const MAKE_FAMILIES = ['M', 'UN', 'BSW', 'BSF', 'G', 'R', 'NPT', 'MK', 'Pg', 'Tr', 'S'];
 const DEFAULTS = { fam: 'M', size: 'M:M10', side: 'ext', cls: '', u: 'mm', feed: 'flank', n: '' };
 const state = { ...DEFAULTS };
 
@@ -21,17 +21,23 @@ const state = { ...DEFAULTS };
  * % = (D − drill) / (0.01299 / TPI) for 60° threads, i.e. 100 % is a drill of D − 1.299·P).
  * For Whitworth forms the same idea uses its own depth: 100 % is D − 1.2807·P.
  */
+/** Half the flank overlap as a multiple of P: 100 % thread is a hole of d − 2·k·P. */
+function overlapK(row) {
+  if (row.family === 'Pg') return row.hInt / row.pitch;
+  if (row.family === 'Tr') return 0.5; // H1 = 0.5·P, so 100 % is D1 = d − P
+  if (row.family === 'S') return 0.75; // H1 = 0.75·P, so 100 % is D1 = d − 1.5·P
+  return FORMS[FAMILIES[row.family].form].d2k;
+}
+
 export function percentThread(row, drillMm) {
-  // Tr: 100 % is the full flank overlap H1 = 0.5·P, i.e. a hole of D1 = d − P.
-  const k = row.family === 'Pg' ? row.hInt / row.pitch : row.family === 'Tr' ? 0.5 : FORMS[FAMILIES[row.family].form].d2k;
-  return ((row.d - drillMm) / (2 * k * row.pitch)) * 100;
+  return ((row.d - drillMm) / (2 * overlapK(row) * row.pitch)) * 100;
 }
 
 /** Drill sizes to offer: metric (0.05 mm steps below 3 mm, 0.1 mm above) and fractional inch (1/64). */
 export function drillChoices(row, minor) {
   const want = (pct) => pct >= 55 && pct <= 95;
   const out = [];
-  const lo = row.d - 0.95 * 2 * 0.65 * row.pitch - 0.5;
+  const lo = row.d - 0.95 * 2 * overlapK(row) * row.pitch - 0.5;
   const hi = row.d;
   // Count in hundredths of a millimetre so the steps stay exactly on the drill grid:
   // every 0.05 mm below 3 mm, every 0.1 mm from 3 mm up.
@@ -62,11 +68,15 @@ export function drillChoices(row, minor) {
   return out;
 }
 
-/** Infeed: compound angle is half the thread angle less ½°, so the trailing flank just shaves. */
+/**
+ * Infeed: compound angle is half the thread angle less ½°, so the trailing flank just shaves.
+ * S (3°/30°): set along the 30° flank, 29.5°, so the steep 3° side does the cutting. That
+ * follows from the geometry; no source for it yet, so the page says so.
+ */
 export function infeed(row, side) {
   const prof = profileOf(row);
   const depth = (side === 'ext' ? prof.hExt : prof.hInt) * row.pitch;
-  const compound = prof.angle / 2 - 0.5;
+  const compound = Array.isArray(prof.angle) ? Math.max(...prof.angle) - 0.5 : prof.angle / 2 - 0.5;
   return { depth, compound, travel: depth / Math.cos((compound * Math.PI) / 180) };
 }
 
@@ -126,10 +136,21 @@ function render() {
   // Sizes
   const dl = $('k-sizes');
   dl.replaceChildren();
-  $('k-pitch').textContent = pitchBoth(row.pitch) + ` · ${num(row.angle, row.angle % 1 ? 1 : 0)}°`;
+  $('k-pitch').textContent = pitchBoth(row.pitch) + (row.flanks ? ` · ${row.flanks[0]}° / ${row.flanks[1]}°` : ` · ${num(row.angle, row.angle % 1 ? 1 : 0)}°`);
   if (row.taper) {
     dl.append(row3(t('make.taper'), t('make.taperValue')));
-    if (row.family === 'NPT') {
+    if (row.family === 'MK') {
+      // DIN 158: sizes at the gauge plane (a from the small end) and at the test plane (b).
+      dl.append(row3(t('make.gaugeMajor'), ...both(row.d)));
+      dl.append(row3(t('make.gaugePitch'), ...both(row.d2)));
+      dl.append(row3(t('make.gaugeRoot'), ...both(row.d3)));
+      dl.append(row3('a ' + t('make.gaugeDistEnd'), ...both(row.gauge)));
+      dl.append(row3(t('make.testMajor'), ...both(row.dTest)));
+      dl.append(row3(t('make.testPitch'), ...both(row.d2Test)));
+      dl.append(row3('b ' + t('make.testDist'), ...both(row.testDist)));
+      dl.append(row3('l1 ' + t('make.useful'), ...both(row.useful)));
+      dl.append(row3('h3 ' + t('make.h3max'), ...both(row.h3max)));
+    } else if (row.family === 'NPT') {
       dl.append(row3(t('make.od'), ...both(row.d)));
       dl.append(row3('E0 ' + t('make.e0'), ...both(row.E0)));
       dl.append(row3('E1 ' + t('make.e1'), ...both(row.E1)));
@@ -152,7 +173,11 @@ function render() {
       dl.append(row3(t('make.d2max'), ...both(l.d2.max)));
       dl.append(row3(t('make.d2min'), ...both(l.d2.min)));
     } else dl.append(row3(t('make.d2basic'), ...both(row.d2)));
-    dl.append(row3(t(row.family === 'M' || row.family === 'Tr' ? 'make.root' : 'make.rootApprox'), ...both(row.d3 ?? row.d - 2 * profileOf(row).hExt * row.pitch)));
+    dl.append(row3(t(['M', 'Tr', 'S'].includes(row.family) ? 'make.root' : 'make.rootApprox'), ...both(row.d3 ?? row.d - 2 * profileOf(row).hExt * row.pitch)));
+    if (row.family === 'S') {
+      dl.append(row3('h3 ' + t('make.h3'), ...both(row.h3)));
+      dl.append(row3('R ' + t('make.rootR'), ...both(row.rootR)));
+    }
     if (row.toolWidth) dl.append(row3('b ' + t('make.toolWidth'), ...both(row.toolWidth)));
   } else {
     if (l.minor) {
@@ -162,16 +187,26 @@ function render() {
     if (l.d2) {
       dl.append(row3(t('make.D2min'), ...both(l.d2.min)));
       dl.append(row3(t('make.D2max'), ...both(l.d2.max)));
-    } else dl.append(row3(t('make.d2basic'), ...both(row.d2)));
+    } else if (row.D2) dl.append(row3('D2 ' + t('make.D2nut'), ...both(row.D2)));
+    else dl.append(row3(t('make.d2basic'), ...both(row.d2)));
+    if (row.family === 'S') dl.append(row3('H1 ' + t('make.H1'), ...both(row.H1)));
     if (row.D4) dl.append(row3('D4 ' + t('make.D4'), ...both(row.D4)));
     else dl.append(row3(t('make.majorMinInt'), ...both(l.major ? l.major.min : row.d)));
     if (row.toolWidth) dl.append(row3('b ' + t('make.toolWidth'), ...both(row.toolWidth)));
   }
   const src = $('k-source');
-  const key = row.family === 'Tr' && l.source === 'none' ? 'make.srcTr' : { table: 'make.srcTable', formula: 'make.srcFormula', maker: 'make.srcMaker', none: 'make.srcNone', gauge: 'make.srcGauge', undefined: 'status.undefined', range: 'status.range' }[l.source];
+  const key = row.family === 'Tr' && l.source === 'none' ? 'make.srcTr' : row.family === 'S' ? 'make.srcS' : row.family === 'MK' ? 'make.srcMK' : { table: 'make.srcTable', formula: 'make.srcFormula', maker: 'make.srcMaker', none: 'make.srcNone', gauge: 'make.srcGauge', undefined: 'status.undefined', range: 'status.range' }[l.source];
   if (row.tapDrill && state.side === 'int') src.dataset.book = '1';
   src.textContent = t(key || 'make.srcNone') + (l.note === 'unMinor' ? ' ' + t('make.unMinor') : '');
   src.className = 'note ' + (['table'].includes(l.source) ? 'info' : 'warn');
+  // DIN 158 has no internal taper: the fitting screws into an ordinary parallel M hole.
+  const mkInt = row.family === 'MK' && state.side === 'int';
+  $('k-mk-int').hidden = !mkInt;
+  if (mkInt) $('k-mk-int').textContent = t('make.mkInt', { size: `M${num(row.d, row.d % 1 ? 1 : 0)} × ${num(row.pitch, row.pitch % 1 ? 1 : 0)}` });
+  dl.hidden = mkInt;
+  $('k-cut-panel').hidden = mkInt;
+  // S: the compound setting comes from the geometry, not from a source.
+  $('k-s-feed').hidden = !(row.family === 'S' && state.feed === 'flank');
 
   // Drilling (inside, parallel threads)
   const drillPanel = $('k-drill-panel');
@@ -201,7 +236,7 @@ function render() {
       }
     }
   }
-  $('k-taper-drill').hidden = !(state.side === 'int' && row.taper);
+  $('k-taper-drill').hidden = !(state.side === 'int' && row.taper && row.family !== 'MK');
 
   // Single-point threading
   const f = infeed(row, state.side);
@@ -234,7 +269,7 @@ export function init() {
   fillSelect($('k-fam'), MAKE_FAMILIES.map((f) => [f, t('fam.' + f)]));
   $('k-fam').addEventListener('change', () => {
     state.fam = $('k-fam').value;
-    const first = family(state.fam).find((r) => ['M10', '1/2-13 UNC', '1/2 BSW', '1/2 BSF', 'G 1/2', 'R 1/2', '1/2 NPT', 'Pg 9', 'Tr 20 × 4'].includes(r.name)) || family(state.fam)[0];
+    const first = family(state.fam).find((r) => ['M10', '1/2-13 UNC', '1/2 BSW', '1/2 BSF', 'G 1/2', 'R 1/2', '1/2 NPT', 'M10 × 1 keg', 'Pg 9', 'Tr 20 × 4', 'S 40 × 7'].includes(r.name)) || family(state.fam)[0];
     state.size = first.id;
     state.u = FAMILIES[state.fam].unit;
     state.cls = '';

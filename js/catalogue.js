@@ -1,7 +1,7 @@
 // The thread catalogue: every size of every family, with its diameters worked out, in mm.
 // All three tabs read from here. Raw lists and their sources are in js/data/catalogue-data.js.
 
-import { METRIC_COARSE, METRIC_FINE, UNIFIED, BSW, BSF, PIPE_G, PIPE_R, NPT, PG, TRAPEZ, TAP_DRILL_COARSE } from './data/catalogue-data.js';
+import { METRIC_COARSE, METRIC_FINE, UNIFIED, BSW, BSF, PIPE_G, PIPE_R, NPT, PG, TRAPEZ, TAP_DRILL_COARSE, METRIC_TAPER, BUTTRESS } from './data/catalogue-data.js';
 import { parseInch } from './threads.js';
 
 export const IN = 25.4;
@@ -57,6 +57,23 @@ export const FORMS = {
     crestTop: 1 / (4 * Math.tan((15 * Math.PI) / 180)) + 0.25,
     flankTop: 1 / (4 * Math.tan((15 * Math.PI) / 180)) + 0.25,
   },
+  // Metric buttress S (DIN 513): load flank 3°, other flank 30° from the radial, so the
+  // "angle" is 33° but the wire maths needs the two flanks. Pitch diameter d − 0.75·P; the
+  // crest flat stands 0.375·P above the pitch line, and the sharp groove bottom is
+  // (P/2)/(tan 3° + tan 30°) = 0.79396·P below it. Root radius R = 0.12427·P.
+  // Check: thread width at the crest = 0.5·P − 0.375·P·(tan 3° + tan 30°) = 0.26384·P, the
+  // DIN 513 profile width w (validation/wire-geometry.test.mjs).
+  s: {
+    angle: 33,
+    flanks: [3, 30],
+    d2k: 0.75,
+    d1k: 1.5,
+    crestTop: 0.375 + 0.5 / (Math.tan((3 * Math.PI) / 180) + Math.tan((30 * Math.PI) / 180)),
+    flankTop: 0.375 + 0.5 / (Math.tan((3 * Math.PI) / 180) + Math.tan((30 * Math.PI) / 180)),
+    rootRadius: 0.124271,
+    hExt: 0.867767, // h3 = H1 + ac = 0.75·P + 0.117767·P
+    hInt: 0.75, // H1
+  },
 };
 
 // ---- Families ------------------------------------------------------------------------------
@@ -71,6 +88,10 @@ export const FAMILIES = {
   NPT: { form: 'npt', unit: 'in', pitchAs: 'tpi', taper: true, tol: 'gauge', std: 'ASME B1.20.1', own: false },
   Pg: { form: 'pg', unit: 'mm', pitchAs: 'mm', taper: false, tol: 'din40430', std: 'DIN 40430', own: false },
   Tr: { form: 'tr', unit: 'mm', pitchAs: 'mm', taper: false, tol: 'none', std: 'DIN 103', own: false },
+  // Metric taper external threads (grease nipples, plugs): 1:16, ISO 60° profile, screw
+  // into an ordinary parallel M internal thread.
+  MK: { form: 'iso', unit: 'mm', pitchAs: 'mm', taper: true, tol: 'gauge', std: 'DIN 158-1', own: false },
+  S: { form: 's', unit: 'mm', pitchAs: 'mm', taper: false, tol: 'none', std: 'DIN 513-1', own: false },
 };
 
 const fmt = (x) => String(x).replace(/\.0+$/, '');
@@ -186,6 +207,50 @@ function build() {
       src: ['Toflubok'],
     });
   }
+  // DIN 158: one row per size for the normal ("keglig") length and one for the short version.
+  // Diameters are at the gauge plane, a from the small end; the test plane b is further in.
+  for (const [p, l1, l1s, h3, h3s, a, as, b, bs, sizes] of METRIC_TAPER) {
+    for (const d of sizes) {
+      for (const short of [false, true]) {
+        const ga = short ? as : a;
+        const gb = short ? bs : b;
+        const grow = (gb - ga) / 16; // 1:16 on the diameter
+        const base = rowFromForm('MK', short ? 'short' : 'normal', `M${fmt(d)} × ${fmt(p)} ${short ? 'keg kurz' : 'keg'}`, d, p);
+        rows.push({
+          ...base,
+          id: `MK:${d}x${p}${short ? 'k' : ''}`,
+          d3: d - 1.226869 * p, // ISO 965-1 external root, at the gauge plane
+          gauge: ga,
+          testDist: gb,
+          useful: short ? l1s : l1,
+          h3max: short ? h3s : h3,
+          dTest: d + grow,
+          d2Test: base.d2 + grow,
+          d3Test: d - 1.226869 * p + grow,
+          short,
+          src: ['Toflubok'],
+        });
+      }
+    }
+  }
+  for (const [d, p, d3, h3, D1, H1, R] of BUTTRESS) {
+    rows.push({
+      ...rowFromForm('S', 'S', `S ${d} × ${p}`, d, p),
+      id: `S:${d}x${p}`,
+      flanks: FORMS.s.flanks,
+      d1: D1, // the nut's minor diameter
+      d3, // the screw's root diameter
+      h3,
+      H1,
+      rootR: R,
+      // Nut pitch diameter: the book gives axial clearance a = 0.1·√P; shifting the 3°/30°
+      // flanks apart by a opens the diameter by 2·a/(tan 3° + tan 30°) = 3.1758·a.
+      D2: d - 0.75 * p + 3.1758 * 0.1 * Math.sqrt(p),
+      hExt: h3,
+      hInt: H1,
+      src: ['Toflubok'],
+    });
+  }
   return rows;
 }
 
@@ -198,6 +263,8 @@ export const family = (fam) => CATALOGUE.filter((r) => r.family === fam);
 export function profileOf(row) {
   if (row.family === 'Pg') return { angle: 80, crestTop: row.crestTop, flankTop: row.flankTop, hExt: row.hExt / row.pitch, hInt: row.hInt / row.pitch };
   if (row.family === 'Tr') return { ...FORMS.tr, hExt: row.hExt / row.pitch, hInt: row.hInt / row.pitch };
+  // S: the wire maths takes the two flank angles; the angle shown stays 33°.
+  if (row.family === 'S') return { ...FORMS.s, angle: FORMS.s.flanks, hExt: row.hExt / row.pitch, hInt: row.hInt / row.pitch };
   const f = FORMS[FAMILIES[row.family].form];
   return { angle: f.angle, crestTop: f.crestTop, flankTop: f.flankTop, hExt: f.hExt, hInt: f.hInt };
 }

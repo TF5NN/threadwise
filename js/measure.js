@@ -10,7 +10,10 @@ import { num, len, other, toMm, local, DECIMALS, fillSelect, setSeg, wireSeg, MM
 import * as hash from './hash.js';
 
 const $ = (id) => document.getElementById(id);
-export const MEASURE_FAMILIES = ['M', 'UN', 'BSW', 'BSF', 'G', 'Pg', 'Tr'];
+export const MEASURE_FAMILIES = ['M', 'UN', 'BSW', 'BSF', 'G', 'Pg', 'Tr', 'S'];
+
+/** Why a family has no standard tolerances in Threadwise yet. */
+const noneKey = (fam) => (fam === 'Tr' ? 'status.noneTr' : fam === 'S' ? 'status.noneS' : 'status.noneBS84');
 
 const DEFAULTS = { fam: 'M', size: 'M:M10', d: '10', p: '1.5', mode: 'standard', cls: '6g', es: '0', ei: '-0.1', g: '', gu: 'mm', ru: 'mm', m: '' };
 const state = { ...DEFAULTS };
@@ -100,11 +103,11 @@ function readTolerance(row) {
     if (es === null || ei === null) return { error: 'status.input' };
     if (ei >= es) return { error: 'status.order' };
     // Families without standard tolerances in Threadwise say why the deviations are typed.
-    const why = CLASS_LIST[state.fam] ? 'status.manual' : state.fam === 'Tr' ? 'status.noneTr' : 'status.noneBS84';
+    const why = CLASS_LIST[state.fam] ? 'status.manual' : noneKey(state.fam);
     return { es: toMm(es, inch ? 'in' : 'mm'), ei: toMm(ei, inch ? 'in' : 'mm'), status: why };
   }
   const l = limits(row, 'ext', state.cls);
-  if (!l.d2) return { error: l.source === 'none' ? (state.fam === 'Tr' ? 'status.noneTr' : 'status.noneBS84') : 'status.' + l.source };
+  if (!l.d2) return { error: l.source === 'none' ? noneKey(state.fam) : 'status.' + l.source };
   const status =
     state.fam === 'M' ? (l.source === 'table' ? 'status.table' : 'status.formula')
     : state.fam === 'UN' ? 'status.unified'
@@ -119,7 +122,7 @@ function render() {
   mark('p', !row && state.size === 'own');
   const tol = row ? readTolerance(row) : { error: 'status.input' };
   const status = $('status');
-  status.className = 'note ' + (tol.error ? (tol.error === 'status.input' ? 'info' : 'warn') : ['status.formula', 'status.maker', 'status.noneTr', 'status.noneBS84'].includes(tol.status) ? 'warn' : 'info');
+  status.className = 'note ' + (tol.error ? (tol.error === 'status.input' ? 'info' : 'warn') : ['status.formula', 'status.maker', 'status.noneTr', 'status.noneS', 'status.noneBS84'].includes(tol.status) ? 'warn' : 'info');
   status.textContent = t(tol.error || tol.status);
 
   // Wires
@@ -150,8 +153,10 @@ function render() {
       box.textContent = fit === 'ok' ? t(nearBest ? 'wire.okBest' : 'wire.offBest') : t('wire.' + fit);
       $('w-mark').className = 'mark ' + fit;
     }
+    // S has two flank angles (3° and 30°), so it gets its own note.
+    const asym = Array.isArray(prof.angle);
     $('w-note').hidden = prof.angle === 60;
-    $('w-note').textContent = t('wire.form', { angle: num(prof.angle, prof.angle % 1 ? 1 : 0) });
+    $('w-note').textContent = asym ? t('wire.formS') : t('wire.form', { angle: num(prof.angle, prof.angle % 1 ? 1 : 0) });
   } else {
     for (const id of ['w-min', 'w-best', 'w-max']) $(id).textContent = '–';
     $('w-mark').hidden = true;
@@ -175,7 +180,8 @@ function render() {
     hash.write();
     return;
   }
-  const angle = row.angle;
+  // The wire maths takes the two flank angles for S, the included angle for the rest.
+  const angle = row.flanks || row.angle;
   const d2max = row.d2 + tol.es;
   const d2min = row.d2 + tol.ei;
   const d2mid = (d2max + d2min) / 2;
@@ -244,7 +250,7 @@ export function init() {
     state.g = convert(state.g, state.gu, unit);
     state.m = '';
     Object.assign(state, { fam, gu: unit, ru: unit, cls: CLASS_LIST[fam]?.defExt || '', mode: CLASS_LIST[fam] ? 'standard' : 'manual' });
-    const first = family(fam).find((r) => ['M10', '1/2-13 UNC', '1/2 BSW', '1/2 BSF', 'G 1/2', 'Pg 9', 'Tr 20 × 4'].includes(r.name)) || family(fam)[0];
+    const first = family(fam).find((r) => ['M10', '1/2-13 UNC', '1/2 BSW', '1/2 BSF', 'G 1/2', 'Pg 9', 'Tr 20 × 4', 'S 40 × 7'].includes(r.name)) || family(fam)[0];
     state.size = first.id;
     showFields();
     render();

@@ -19,7 +19,7 @@ Nothing is changed silently.
 | 2026-11-20 | Tr 40 × 7, tool width b | Töflubók prints 2.297 | Formula b = 0.366·P − 0.54·ac = 2.292, as printed for Tr 42 × 7 and Tr 44 × 7 | **2.292.** |
 | 2026-11-20 | 3" BSW, d2 | Töflubók p. 269 prints 72.56 | Its own d1 (66.91) and formula give 71.55; Engineers Edge 2.817" = 71.55 mm | **71.55** (exact 71.553). Misprint. |
 | 2026-11-20 | BSW values to 0.01 mm | Töflubók uses d2 = d − 0.640·P, d1 = d − 1.28·P (rounded constants, per its header) | BS 84: 0.640327, 1.280654 | Exact constants used; the book can differ by up to ~0.007 mm. Documented in the check. |
-| 2026-11-20 | M60 tap drill | Töflubók p. 265 prints 55 mm | 6H minor diameter limits 54.046–54.796 mm (ISO 965-1): 55 is outside | **Open.** Shown as printed with ★ and marked "Over" in Make. Needs a look at the book (could be a misread of 54.5 or a book rounding). |
+| 2026-11-20 | M60 tap drill | Töflubók p. 265 prints 55 mm | 6H minor diameter limits 54.046–54.796 mm (ISO 965-1): 55 is outside | **Resolved 2026-11-20:** 54.5 mm is used. Walter (M60×5.5 tap, "drill bit size 54.50 mm") and BAER (M60×5.5 hand tap, 54.5 mm) agree and it sits inside 6H; the same sources give 50.5 for M56, as the book does. The online Fossberg Snitttafla (issuu) could not be read to check. Most likely a misread of the photo or a rounding in the book. |
 | 2026-11-20 | M30 × 2 6H, D2 min | Töflubók p. 270 prints 28.702 | Basic pitch diameter 28.701 (p. 265 of the same book) | **28.701.** Misprint or misread of the photo. |
 | 2026-11-20 | Whitworth status | Engineers Edge: BS 84 | Töflubók p. 269 marks Whitworth *óstaðlað* (not standardised, in the DIN context) | Noted. BS 84 tolerances still not sourced. |
 
