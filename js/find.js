@@ -98,14 +98,24 @@ function readAngle() {
   return null;
 }
 
+/**
+ * Flank angle from the two-wire readings. Over a real thread the reading grows 2.5 to 5 times
+ * as much as the wire does (80° to 29° threads), so anything else is a typing or measuring
+ * slip, and the message says which kind.
+ */
 function twoWire() {
   const vals = ['g1', 'm1', 'g2', 'm2'].map((k) => parseNumber(state[k]));
   if (vals.some((v) => v === null)) return null;
   const [g1, m1, g2, m2] = vals.map((v) => toMm(v, state.wu));
+  if (g1 === g2) return { error: 'find.twSame' };
+  const k = (m2 - m1) / (g2 - g1);
+  if (k <= 0) return { error: 'find.twOrder' };
   const r = angleFromTwoWires(m1, g1, m2, g2);
-  if (!r) return { error: true };
+  const ratio = { ratio: num(k, 2), dg: len(Math.abs(g2 - g1), state.wu), lo: len(2.5 * Math.abs(g2 - g1), state.wu), hi: len(5 * Math.abs(g2 - g1), state.wu) };
+  if (!r) return { error: 'find.twRatio', ...ratio };
   const sigma = angleUncertainty(r.angle, g1, g2, 0.002, 0.001);
-  return { ...r, sigma };
+  const odd = r.angle < 25 || r.angle > 90;
+  return { ...r, sigma, odd, ...ratio };
 }
 
 function render() {
@@ -130,9 +140,11 @@ function render() {
   const twBox = $('f-tw-result');
   twBox.hidden = !tw;
   if (tw) {
-    twBox.className = 'note ' + (tw.error ? 'warn' : 'info');
-    twBox.textContent = tw.error ? t('find.twBad') : t('find.twResult', { angle: num(tw.angle, 1), sigma: num(tw.sigma, 1) });
-    $('f-tw-use').hidden = !!tw.error;
+    twBox.className = 'note ' + (tw.error || tw.odd ? 'warn' : 'info');
+    twBox.textContent = tw.error
+      ? t(tw.error, tw)
+      : t('find.twResult', { angle: num(tw.angle, 1), sigma: num(tw.sigma, 1) }) + (tw.odd ? ' ' + t('find.twOdd') : '');
+    $('f-tw-use').hidden = !!tw.error || tw.odd;
   }
 
   const d = parseNumber(state.d);

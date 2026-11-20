@@ -182,9 +182,18 @@ export const STRINGS = {
   'find.g2': { en: 'Wire 2', is: 'Vír 2' },
   'find.m2': { en: 'Reading 2', is: 'Mæling 2' },
   'find.twUse': { en: 'Use this angle', is: 'Nota þetta horn' },
-  'find.twBad': {
-    en: 'These readings cannot come from one thread: the larger wire must give the larger reading. Check that the wires are in the right boxes.',
-    is: 'Þessar mælingar geta ekki komið frá einni gengju: sverari vírinn verður að gefa stærri mælingu. Athugaðu hvort vírarnir séu í réttum reitum.',
+  'find.twSame': { en: 'The two wires are the same size: use two different sizes.', is: 'Vírarnir eru jafn sverir: notaðu tvær ólíkar stærðir.' },
+  'find.twOrder': {
+    en: 'The thicker wire must give the larger reading. Check that each reading is in the box next to its own wire.',
+    is: 'Sverari vírinn verður að gefa stærri mælingu. Athugaðu hvort hver mæling sé við hliðina á sínum vír.',
+  },
+  'find.twRatio': {
+    en: 'The readings differ by only {ratio} times the wire difference. Over a real thread a {dg} larger wire adds between {lo} (80° thread) and {hi} (29° thread). Check the readings and the wire sizes.',
+    is: 'Mælingarnar munar aðeins {ratio} sinnum mun víranna. Yfir raunverulega gengju bætir {dg} sverari vír við á milli {lo} (80° gengja) og {hi} (29° gengja). Athugaðu mælingarnar og vírastærðirnar.',
+  },
+  'find.twOdd': {
+    en: 'That is outside the angles of common threads (29° to 80°), so check the readings before using it.',
+    is: 'Það er utan horna algengra gengja (29° til 80°), svo athugaðu mælingarnar áður en þú notar það.',
   },
   'find.twResult': {
     en: 'Flank angle about {angle}° (± {sigma}° with a 2 µm micrometer and wires known to 1 µm).',
