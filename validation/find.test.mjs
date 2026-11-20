@@ -4,7 +4,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { CATALOGUE } from '../js/catalogue.js';
-import { rank, defaultWindows, typicalSpread, threadsToTell, snapTwoWire } from '../js/find.js';
+import { rank, defaultWindows, threadsToTell, snapTwoWire } from '../js/find.js';
 import { overWires, angleFromTwoWires } from '../js/geometry.js';
 
 // A small deterministic random generator, so the test gives the same result every run.
@@ -30,10 +30,10 @@ for (const side of ['ext', 'int']) {
       if (row.short || (row.family === 'MK' && side === 'int')) continue;
       for (let k = 0; k < 5; k++) {
         const base = side === 'ext' ? row.d : row.d1;
-        const w = defaultWindows(side, base);
-        const typ = typicalSpread(side, base);
-        // Real parts: bolts up to 70 % of the usual spread under size, holes up to 70 % over.
-        const d = side === 'ext' ? base - rnd() * 0.7 * typ.under : base + rnd() * 0.7 * typ.over;
+        // Used parts, with the default (medium) windows: bolts up to 90 % of the window under
+        // size, holes up to 90 % over.
+        const w = defaultWindows(side, base, 'medium');
+        const d = side === 'ext' ? base - rnd() * 0.9 * w.minus : base + rnd() * 0.9 * w.plus;
         // A pitch gauge reads the nominal pitch; add up to ±0.5 % for a caliper over 10 threads.
         const pitch = row.pitch * (1 + (rnd() - 0.5) * 0.01);
         const r = rank({ side, d, pitch, minus: w.minus, plus: w.plus, pitchTol: 0.02, taper: row.taper ? 'taper' : 'parallel' });
@@ -91,7 +91,8 @@ test('DIN 158 shows up once, as a tapered bolt, and never as a hole', () => {
 
 // ---- Edge of the window, and look-alikes across standards ------------------------------------
 
-import { GAUGE_PITCH_TOL } from '../js/find.js';
+import { PRESETS, SYSTEMS } from '../js/find.js';
+import { limits } from '../js/tolerances.js';
 
 test('a worn M10 at 9.7 mm fits the default window (a new 6g M10 can already be 9.732)', () => {
   const w = defaultWindows('ext', 9.7);
@@ -122,10 +123,10 @@ test('M10 and 3/8" look-alikes are flagged both ways (the JCB mix-up), even outs
 });
 
 test('a pitch gauge on a dirty bolt: 1.5 mm keeps 3/8-16 UNC in the list, and M10 stays on top', () => {
-  assert.ok(GAUGE_PITCH_TOL >= 0.056); // 1.5 mm vs 16 TPI is 5.5 % apart
+  assert.ok(PRESETS.loose.gauge >= 0.056); // 1.5 mm vs 16 TPI is 5.5 % apart
   // 9.6 mm could be a worn M10 or a 3/8" that measures a little over (dirt on the crests).
-  const w = defaultWindows('ext', 9.6);
-  const r = rank({ side: 'ext', d: 9.6, pitch: 1.5, minus: w.minus, plus: w.plus, taper: 'parallel' });
+  const w = defaultWindows('ext', 9.6, 'loose');
+  const r = rank({ side: 'ext', d: 9.6, pitch: 1.5, minus: w.minus, plus: w.plus, pitchTol: PRESETS.loose.gauge, taper: 'parallel' });
   const names = r.inside.map((s) => s.row.name);
   assert.equal(names[0], 'M10');
   assert.ok(names.includes('3/8-16 UNC'), names.join(', '));
@@ -142,8 +143,8 @@ test('wider windows list more, but never push an unlikely thread above a likely 
   assert.equal(wide.inside[0].row.name, 'M10');
 });
 
-test('a rusty 3/8" bolt reading over size is listed (9.7 mm, 16 TPI)', () => {
-  const w = defaultWindows('ext', 9.7);
+test('a rusty 3/8" bolt reading over size is listed with the loose preset (9.7 mm, 16 TPI)', () => {
+  const w = defaultWindows('ext', 9.7, 'loose');
   const r = rank({ side: 'ext', d: 9.7, pitch: 25.4 / 16, minus: w.minus, plus: w.plus, taper: 'parallel' });
   const names = r.inside.map((s) => s.row.name);
   assert.ok(names.includes('3/8-16 UNC') && names.includes('3/8 BSW'), names.join(', '));
@@ -157,4 +158,52 @@ test('measured over 10 threads, the look-alike warning checks the reading (15.00
   assert.ok(Math.abs(m10.there - 15.875) < 1e-9);
   // Seen from the 3/8-16 UNC card, the same reading points the other way.
   assert.ok(!overThreadsCheck(25.4 / 16, 1.5, 15.0, 10).fitsHere);
+});
+
+// ---- Presets and metric / imperial ---------------------------------------------------------
+
+test('the tight preset still lists every new bolt and nut at the edge of its tolerance class', () => {
+  let checked = 0;
+  for (const row of CATALOGUE) {
+    if (row.short || row.taper) continue;
+    const [ce, ci] = row.family === 'UN' ? ['2A', '2B'] : ['6g', '6H'];
+    const e = limits(row, 'ext', ce);
+    if (e?.major?.min != null) {
+      const w = defaultWindows('ext', e.major.min, 'tight');
+      assert.ok(row.d - e.major.min <= w.minus + 1e-9, `${row.name}: new bolt ${e.major.min} not within ${w.minus}`);
+      checked++;
+    }
+    const i = limits(row, 'int', ci);
+    if (i?.minor?.max != null) {
+      const w = defaultWindows('int', i.minor.max, 'tight');
+      assert.ok(i.minor.max - row.d1 <= w.plus + 1e-9, `${row.name}: new nut ${i.minor.max} not within ${w.plus}`);
+      checked++;
+    }
+  }
+  assert.ok(checked > 250, 'checked ' + checked);
+});
+
+test('tight, medium and loose widen in that order, for every size and both sides', () => {
+  for (const side of ['ext', 'int']) {
+    for (const d of [1, 3, 6, 10, 24, 64]) {
+      const [t, m, l] = ['tight', 'medium', 'loose'].map((p) => defaultWindows(side, d, p));
+      assert.ok(t.minus < m.minus && m.minus < l.minus, `${side} ${d} minus`);
+      assert.ok(t.plus < m.plus && m.plus < l.plus, `${side} ${d} plus`);
+    }
+  }
+  assert.ok(PRESETS.tight.gauge < PRESETS.medium.gauge && PRESETS.medium.gauge < PRESETS.loose.gauge);
+});
+
+test('metric leaves out inch bolts (and their look-alike warnings), keeps pipe threads; imperial the other way', () => {
+  const w = defaultWindows('ext', 9.6, 'loose');
+  const q = { side: 'ext', d: 9.6, pitch: 1.5, minus: w.minus, plus: w.plus, pitchTol: PRESETS.loose.gauge, taper: 'parallel' };
+  const metric = rank({ ...q, system: 'metric' });
+  assert.deepEqual(metric.inside.map((s) => s.row.name), ['M10']);
+  assert.equal(metric.inside[0].lookalikes.length, 0);
+  const imperial = rank({ ...q, system: 'imperial' });
+  assert.ok(imperial.inside.every((s) => SYSTEMS.imperial.includes(s.row.family)));
+  assert.ok(imperial.inside.some((s) => s.row.name === '3/8-16 UNC'));
+  // An oil pressure sender on a Japanese car: R 1/8 (PT 1/8) is found with metric chosen.
+  const pt = rank({ side: 'ext', d: 9.6, pitch: 25.4 / 28, minus: 0.6, plus: 0.3, system: 'metric', taper: 'any' });
+  assert.ok(pt.inside.some((s) => s.row.name === 'R 1/8'), pt.inside.map((s) => s.row.name).join(', '));
 });

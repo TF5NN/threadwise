@@ -302,6 +302,15 @@
                 <button type="button" role="radio" data-value="int" data-i18n="side.intLong">Nut or hole (internal)</button>
               </div>
             </div>
+            <div class="row">
+              <span class="eyebrow" id="f-sys-label" data-i18n="find.sys">Look among</span>
+              <div class="seg" role="radiogroup" aria-labelledby="f-sys-label" id="f-sys">
+                <button type="button" role="radio" data-value="all" data-i18n="find.sysAll">All</button>
+                <button type="button" role="radio" data-value="metric" data-i18n="find.sysMetric">Metric</button>
+                <button type="button" role="radio" data-value="imperial" data-i18n="find.sysImperial">Imperial</button>
+              </div>
+            </div>
+            <p class="note quiet" id="f-sys-hint" hidden></p>
             <div class="fields">
               <label><span id="f-d-label">Diameter over the crests</span> <span class="u f-du-text">mm</span>
                 <input id="f-d" inputmode="decimal" autocomplete="off" spellcheck="false" />
@@ -384,8 +393,14 @@
 
           <section class="panel" aria-labelledby="f-win-title">
             <details class="more">
-              <summary><h2 id="f-win-title" data-i18n="find.winTitle">How close is close enough</h2></summary>
-              <p class="hint" data-i18n="find.winHint">Real parts are not exactly basic size: bolts measure under, holes over. Widen these for worn or damaged threads. Empty boxes use the defaults shown.</p>
+              <summary><h2 id="f-win-title" data-i18n="find.winTitle">How close is close enough</h2> <span class="u" id="f-win-now"></span></summary>
+              <p class="hint" data-i18n="find.winHint">How rough is the thread? The windows decide what gets on the list; the order always follows how real parts usually measure (bolts under, holes over). Empty boxes use the preset's values, shown in grey.</p>
+              <div class="seg" role="radiogroup" aria-label="Condition" data-i18n-attr="aria-label:find.winCond" id="f-win-preset">
+                <button type="button" role="radio" data-value="tight" data-i18n="find.win.tight">Tight</button>
+                <button type="button" role="radio" data-value="medium" data-i18n="find.win.medium">Medium</button>
+                <button type="button" role="radio" data-value="loose" data-i18n="find.win.loose">Loose</button>
+              </div>
+              <p class="note quiet" id="f-win-hint"></p>
               <div class="fields">
                 <label><span data-i18n="find.minus">Diameter, smaller by up to</span> <span class="u f-du-text">mm</span><input id="f-wm" inputmode="decimal" autocomplete="off" /></label>
                 <label><span data-i18n="find.plus">Diameter, larger by up to</span> <span class="u f-du-text">mm</span><input id="f-wp" inputmode="decimal" autocomplete="off" /></label>

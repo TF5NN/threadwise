@@ -169,6 +169,12 @@ published over-wire table (Thread Check / Machinery's Handbook) where one exists
 - Pitch is compared in both mm and TPI. A gauge reading gets ±6 % by default, since on a
   dirty or rusty bolt 1.5 mm and 16 TPI (5.5 % apart) both seem to fit; over N threads with a
   caliper, 0.1 mm over the length.
+- Presets for the windows (20 Nov 2026, Gunnar): **Tight** for new or clean threads (still
+  lists every new bolt and nut at the edge of its tolerance class, checked for the whole
+  catalogue), **Medium** for used fasteners (the default), **Loose** for dirty, rusty or
+  damaged threads. The windows only decide what is listed; the order follows the usual spread.
+- **Look among: All / Metric / Imperial**, for when you know the machine (a Japanese car).
+  Pipe threads G and R stay in both: inch-sized, but found on metric machines too (PF/PT).
 - Look-alikes across standards are flagged on the result whether or not both fit the
   measurement: within 6 % in size and pitch, so the wrong bolt can start or be forced in
   (M10 / 3/8-16 UNC and BSW, M10 × 1 / 3/8-24 UNF, M10 × 1.25 / 3/8 BSF; a JCB parts listing

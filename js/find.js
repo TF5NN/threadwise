@@ -15,6 +15,8 @@ const DEFAULTS = {
   wm: '', wp: '', pw: '', g1: '', m1: '', g2: '', m2: '', wu: 'mm',
   // Flank angle tool: three wires (the usual way) or one wire with the anvil on the thread tops.
   tw: '3',
+  // Which threads to look among (all, metric, imperial) and how rough the thread is (the preset).
+  sys: 'all', win: 'medium',
 };
 const state = { ...DEFAULTS };
 
@@ -39,23 +41,58 @@ export function typicalSpread(side, dMm) {
 }
 
 /**
- * Default windows for the diameter, in mm: how far off a reading may be and still be listed.
- * Wider than the usual spread on both sides: a rusty 3/8" bolt can read 9.7 mm over the scale.
+ * The three presets for "How close is close enough": how far off a reading may be and still
+ * be listed. Each diameter window is [min, add, pct]: the larger of min and add + pct × size, in mm.
+ * gauge is the pitch window for a gauge reading; caliper is how well a caliper reads a length
+ * over N threads, in mm.
+ *  - tight: new or clean threads in good condition. Still lists every new bolt and nut at the
+ *    edge of its tolerance class (a new M4 6g can be 0.16 mm under, a new G 1/4 hole is the
+ *    widest inside; validation/find.test.mjs checks them all).
+ *  - medium: used fasteners, a little worn. The default.
+ *  - loose: dirty, rusty or damaged threads: a rusty 3/8" bolt can read 9.7 mm over the scale,
+ *    and a gauge on a few clean threads cannot tell 1.5 mm from 16 TPI (5.5 % apart).
  */
-export function defaultWindows(side, dMm) {
-  if (side === 'ext') return { minus: Math.max(0.3, 0.06 * dMm), plus: Math.max(0.25, 0.025 * dMm) };
-  return { minus: Math.max(0.25, 0.025 * dMm), plus: Math.max(0.4, 0.06 * dMm) };
+export const PRESETS = {
+  tight: {
+    ext: { minus: [0, 0.15, 0.015], plus: [0.05, 0, 0] },
+    int: { minus: [0.05, 0, 0], plus: [0, 0.15, 0.025] },
+    gauge: 0.02, caliper: 0.05,
+  },
+  medium: {
+    ext: { minus: [0, 0.2, 0.025], plus: [0.1, 0, 0.01] },
+    int: { minus: [0.15, 0, 0.01], plus: [0, 0.2, 0.03] },
+    gauge: 0.04, caliper: 0.075,
+  },
+  loose: {
+    ext: { minus: [0.3, 0, 0.06], plus: [0.25, 0, 0.025] },
+    int: { minus: [0.25, 0, 0.025], plus: [0.4, 0, 0.06] },
+    gauge: 0.06, caliper: 0.1,
+  },
+};
+const presetOf = (name) => PRESETS[name] ?? PRESETS.medium;
+const windowOf = ([min, add, pct], dMm) => Math.max(min, add + pct * dMm);
+
+/** The diameter windows of a preset for a measured size, in mm. */
+export function defaultWindows(side, dMm, preset = 'medium') {
+  const w = presetOf(preset)[side];
+  return { minus: windowOf(w.minus, dMm), plus: windowOf(w.plus, dMm) };
 }
+
+/**
+ * Metric or imperial, for people who know which kind of machine they are working on. Pipe
+ * threads G and R are in both: they are inch-sized, but found on metric machines too (on
+ * Japanese cars as PF and PT), and on British and American ones.
+ */
+export const SYSTEMS = {
+  metric: ['M', 'MK', 'Tr', 'S', 'Pg', 'G', 'R'],
+  imperial: ['UN', 'BSW', 'BSF', 'NPT', 'G', 'R'],
+};
 
 /** How far a gauge reading usually is from the real pitch; used only for the order. */
 export const GAUGE_PITCH_TYPICAL = 0.02;
 
-/**
- * How far a pitch read off a gauge may be from the real one and still be listed, as a
- * fraction. A gauge on a clean thread tells 5 % apart, but on a dirty or rusty bolt with only
- * a few clean threads it does not: 1.5 mm and 16 TPI (5.5 % apart) both seem to fit.
- */
-export const GAUGE_PITCH_TOL = 0.06;
+/** The pitch window for a gauge reading when none is given: the default preset's. */
+export const GAUGE_PITCH_TOL = PRESETS.medium.gauge;
 
 /**
  * Look-alikes across standards: threads that are close in both size and pitch, so the wrong
@@ -71,7 +108,8 @@ const TAPER_EXTRA = 1.0;
  * Rank catalogue threads against measurements. All lengths in mm.
  * minus/plus and pitchTol are the windows (what gets listed); typical and pitchTypical are the
  * usual spread (the order), from typicalSpread and GAUGE_PITCH_TYPICAL unless given.
- * @param {{ side: 'ext'|'int', d: number, pitch?: number, pitchTol?: number, pitchTypical?: number,
+ * system ('metric' or 'imperial') leaves out the other kind; anything else looks among all.
+ * @param {{ side: 'ext'|'int', d: number, pitch?: number, pitchTol?: number, pitchTypical?: number, system?: string,
  *           typical?: { under: number, over: number },
  *           minus: number, plus: number, angle?: number, angleTol?: number, taper?: 'any'|'parallel'|'taper' }} q
  * @returns {{ inside: object[], closest: object[] }}
@@ -85,6 +123,7 @@ export function rank(q) {
     if (row.short) continue;
     // DIN 158 is external only; its fittings screw into ordinary parallel M holes.
     if (row.family === 'MK' && q.side === 'int') continue;
+    if (SYSTEMS[q.system] && !SYSTEMS[q.system].includes(row.family)) continue;
     if (q.taper === 'parallel' && row.taper) continue;
     if (q.taper === 'taper' && !row.taper) continue;
     if (q.angle && Math.abs(row.angle - q.angle) > (q.angleTol ?? 2)) continue;
@@ -173,13 +212,14 @@ function readPitch() {
     const n = parseNumber(state.n);
     if (!(L > 0) || !(n >= 1)) return null;
     const Lmm = toMm(L, state.du);
-    // A caliper reads crests to about 0.05 mm, 0.1 mm over dirt or rust: over L, the usual
-    // spread and the window of the pitch (0.3 % and 0.7 % over ten 1.5 mm threads).
-    return { pitch: Lmm / n, tol: Math.max(0.01, 0.1 / Lmm), typical: Math.max(0.005, 0.05 / Lmm) };
+    // A caliper reads crests to about 0.05 mm on a clean thread, 0.1 mm over dirt or rust
+    // (the preset says which): over L, that is the pitch window. The order uses 0.05 mm.
+    const cal = presetOf(state.win).caliper;
+    return { pitch: Lmm / n, tol: Math.max(cal / 10, cal / Lmm), typical: Math.max(0.005, 0.05 / Lmm) };
   }
   const v = parseNumber(state.p);
   if (!(v > 0)) return null;
-  return { pitch: state.pm === 'tpi' ? MM_PER_INCH / v : v, tol: GAUGE_PITCH_TOL, typical: GAUGE_PITCH_TYPICAL };
+  return { pitch: state.pm === 'tpi' ? MM_PER_INCH / v : v, tol: presetOf(state.win).gauge, typical: GAUGE_PITCH_TYPICAL };
 }
 
 function readAngle() {
@@ -212,6 +252,13 @@ function twoWire() {
 
 function render() {
   setSeg($('f-side'), state.side);
+  setSeg($('f-sys'), state.sys);
+  setSeg($('f-win-preset'), state.win);
+  const sysHint = $('f-sys-hint');
+  sysHint.hidden = state.sys === 'all';
+  if (state.sys !== 'all') sysHint.textContent = t('find.sysHint');
+  $('f-win-hint').textContent = t('find.win.' + (PRESETS[state.win] ? state.win : 'medium') + 'Hint');
+  $('f-win-now').textContent = '· ' + t('find.win.' + (PRESETS[state.win] ? state.win : 'medium'));
   setSeg($('f-du'), state.du);
   setSeg($('f-pm'), state.pm);
   setSeg($('f-taper'), state.taper);
@@ -253,18 +300,22 @@ function render() {
     return;
   }
   const dMm = toMm(d, state.du);
-  const def = defaultWindows(state.side, dMm);
-  const minus = parseNumber(state.wm) ?? def.minus;
-  const plus = parseNumber(state.wp) ?? def.plus;
-  const pTol = (parseNumber(state.pw) ?? (pitch ? pitch.tol * 100 : GAUGE_PITCH_TOL * 100)) / 100;
-  $('f-wm').placeholder = num(def.minus, 2);
-  $('f-wp').placeholder = num(def.plus, 2);
-  $('f-pw').placeholder = num(pitch ? pitch.tol * 100 : GAUGE_PITCH_TOL * 100, 1);
+  const def = defaultWindows(state.side, dMm, state.win);
+  // The window boxes are in the same unit as the diameter (their labels say so).
+  const typedMm = (v) => (parseNumber(v) === null ? null : toMm(parseNumber(v), state.du));
+  const inUnit = (mm) => (state.du === 'in' ? num(mm / MM_PER_INCH, 4) : num(mm, 2));
+  const minus = typedMm(state.wm) ?? def.minus;
+  const plus = typedMm(state.wp) ?? def.plus;
+  const gauge = presetOf(state.win).gauge;
+  const pTol = (parseNumber(state.pw) ?? (pitch ? pitch.tol * 100 : gauge * 100)) / 100;
+  $('f-wm').placeholder = inUnit(def.minus);
+  $('f-wp').placeholder = inUnit(def.plus);
+  $('f-pw').placeholder = num(pitch ? pitch.tol * 100 : gauge * 100, 1);
   $('f-pitch-read').textContent = pitch ? pitchBoth(pitch.pitch) : '';
 
   const ang = readAngle();
   const { inside, closest } = rank({
-    side: state.side, d: dMm, pitch: pitch?.pitch, pitchTol: pTol, pitchTypical: pitch?.typical, minus, plus,
+    side: state.side, d: dMm, pitch: pitch?.pitch, pitchTol: pTol, pitchTypical: pitch?.typical, minus, plus, system: state.sys,
     angle: ang?.angle, angleTol: ang?.tol, taper: state.taper,
   });
   const shown = inside.length ? inside : closest;
@@ -351,7 +402,7 @@ function render() {
 
 export function init() {
   hash.register(P, state, DEFAULTS);
-  const segs = [['f-side', 'side'], ['f-du', 'du'], ['f-pm', 'pm'], ['f-taper', 'taper'], ['f-wu', 'wu'], ['f-tw-way', 'tw']];
+  const segs = [['f-side', 'side'], ['f-du', 'du'], ['f-pm', 'pm'], ['f-taper', 'taper'], ['f-wu', 'wu'], ['f-tw-way', 'tw'], ['f-sys', 'sys'], ['f-win-preset', 'win']];
   for (const [id, key] of segs) wireSeg($(id), () => state[key], (v) => { state[key] = v; render(); });
   for (const id of ['d', 'p', 'len', 'n', 'wm', 'wp', 'pw', 'g1', 'm1', 'g2', 'm2']) {
     $('f-' + id).addEventListener('input', () => {
@@ -372,6 +423,7 @@ export function init() {
   });
   $('f-reset').addEventListener('click', () => {
     state.wm = state.wp = state.pw = '';
+    state.win = DEFAULTS.win;
     render();
   });
   render();
