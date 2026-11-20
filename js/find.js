@@ -20,22 +20,40 @@ const state = { ...DEFAULTS };
 
 // ---- The matching itself (no page code, so validation/find.test.mjs can run it) ------------
 
+// Find answers two questions, and keeps them apart:
+//   1. Could it be this thread at all?  The WINDOWS decide what gets on the list. They are
+//      generous, because rejecting the right thread is worse than a longer list: a worn bolt
+//      measures well under, scale or dirt on the crests can make it measure over.
+//   2. How likely is it?  The ORDER comes from how real parts usually measure, whatever the
+//      windows are set to. So widening a window lets more in, at the bottom, and never pushes
+//      an unlikely thread above a likely one.
+
 /**
- * Default windows for the diameter, in mm: how far a real part may sit from the basic size.
- * External threads measure UNDER nominal (allowance, tolerance, wear); bores measure OVER
- * the basic minor diameter (tolerance, wear, tap oversize). A new 6g M10 may already be
- * 2.7 % under (9.732 mm), so bolts get 5 %: the tolerance plus room for wear and rust. Wider
- * barely changes the ranking (validation/find.test.mjs), it only keeps worn bolts in the list.
+ * How real parts usually sit against the basic size, in mm; used only for the order.
+ * Bolts measure UNDER nominal: a new 6g M10 may already be 2.7 % under (9.732 mm), plus wear.
+ * Bores measure OVER the basic minor diameter: tolerance, wear, tap oversize.
  */
-export function defaultWindows(side, dMm) {
-  if (side === 'ext') return { minus: Math.max(0.2, 0.05 * dMm), plus: Math.max(0.1, 0.01 * dMm) };
-  return { minus: Math.max(0.1, 0.01 * dMm), plus: Math.max(0.3, 0.04 * dMm) };
+export function typicalSpread(side, dMm) {
+  if (side === 'ext') return { under: Math.max(0.2, 0.05 * dMm), over: Math.max(0.1, 0.01 * dMm) };
+  return { under: Math.max(0.1, 0.01 * dMm), over: Math.max(0.3, 0.04 * dMm) };
 }
 
 /**
- * How far a pitch read off a gauge may be from the real one, as a fraction. A gauge on a
- * clean thread tells 5 % apart, but on a dirty or rusty bolt with only a few clean threads
- * it does not: 1.5 mm and 16 TPI (5.5 % apart) both seem to fit. 6 % keeps those in the list.
+ * Default windows for the diameter, in mm: how far off a reading may be and still be listed.
+ * Wider than the usual spread on both sides: a rusty 3/8" bolt can read 9.7 mm over the scale.
+ */
+export function defaultWindows(side, dMm) {
+  if (side === 'ext') return { minus: Math.max(0.3, 0.06 * dMm), plus: Math.max(0.25, 0.025 * dMm) };
+  return { minus: Math.max(0.25, 0.025 * dMm), plus: Math.max(0.4, 0.06 * dMm) };
+}
+
+/** How far a gauge reading usually is from the real pitch; used only for the order. */
+export const GAUGE_PITCH_TYPICAL = 0.02;
+
+/**
+ * How far a pitch read off a gauge may be from the real one and still be listed, as a
+ * fraction. A gauge on a clean thread tells 5 % apart, but on a dirty or rusty bolt with only
+ * a few clean threads it does not: 1.5 mm and 16 TPI (5.5 % apart) both seem to fit.
  */
 export const GAUGE_PITCH_TOL = 0.06;
 
@@ -51,12 +69,17 @@ const TAPER_EXTRA = 1.0;
 
 /**
  * Rank catalogue threads against measurements. All lengths in mm.
- * @param {{ side: 'ext'|'int', d: number, pitch?: number, pitchTol?: number,
+ * minus/plus and pitchTol are the windows (what gets listed); typical and pitchTypical are the
+ * usual spread (the order), from typicalSpread and GAUGE_PITCH_TYPICAL unless given.
+ * @param {{ side: 'ext'|'int', d: number, pitch?: number, pitchTol?: number, pitchTypical?: number,
+ *           typical?: { under: number, over: number },
  *           minus: number, plus: number, angle?: number, angleTol?: number, taper?: 'any'|'parallel'|'taper' }} q
  * @returns {{ inside: object[], closest: object[] }}
  */
 export function rank(q) {
   const scored = [];
+  const typ = q.typical ?? typicalSpread(q.side, q.d);
+  const pTyp = q.pitchTypical ?? GAUGE_PITCH_TYPICAL;
   for (const row of CATALOGUE) {
     // DIN 158 short versions have the same diameters and pitch as the normal ones: list once.
     if (row.short) continue;
@@ -71,15 +94,19 @@ export function rank(q) {
     // Tapered threads get a wider window to get IN the list (the diameter depends on where
     // along the taper it was measured), but are ranked on the same scale as everything else.
     const extra = row.taper ? TAPER_EXTRA : 0;
-    const zd = dd < 0 ? -dd / q.minus : dd / q.plus;
+    // On the list? Against the windows.
     const zdIn = dd < 0 ? -dd / (q.minus + extra) : dd / (q.plus + extra);
-    let zp = 0;
-    if (q.pitch) zp = Math.abs(q.pitch - row.pitch) / (row.pitch * (q.pitchTol ?? GAUGE_PITCH_TOL));
+    const pOff = q.pitch ? Math.abs(q.pitch - row.pitch) / row.pitch : 0;
+    const zpIn = pOff / (q.pitchTol ?? GAUGE_PITCH_TOL);
+    // Where on the list? Against the usual spread: 0.3 mm under is ordinary for a bolt,
+    // 0.2 mm over is not, so the second ranks lower even when both are listed.
+    const zd = dd < 0 ? -dd / typ.under : dd / typ.over;
+    const zp = pOff / pTyp;
     const score = Math.hypot(zd, zp);
     // The small margin keeps a reading right on the edge inside: 10 − 9.7 comes out as
     // 0.3000000000000007 in the computer, which would just miss a 0.3 mm window.
     const EDGE = 1 + 1e-9;
-    scored.push({ row, dd, dp: q.pitch ? q.pitch - row.pitch : null, zd, zp, score, inside: zdIn <= EDGE && zp <= EDGE });
+    scored.push({ row, dd, dp: q.pitch ? q.pitch - row.pitch : null, zd, zp, score, inside: zdIn <= EDGE && zpIn <= EDGE });
   }
   scored.sort((a, b) => a.score - b.score);
   const inside = scored.filter((s) => s.inside);
@@ -135,13 +162,13 @@ function readPitch() {
     const n = parseNumber(state.n);
     if (!(L > 0) || !(n >= 1)) return null;
     const Lmm = toMm(L, state.du);
-    // A caliper over dirty or rusty crests is good to about 0.1 mm; over L that is the
-    // pitch uncertainty (0.7 % over ten 1.5 mm threads).
-    return { pitch: Lmm / n, tol: Math.max(0.01, 0.1 / Lmm) };
+    // A caliper reads crests to about 0.05 mm, 0.1 mm over dirt or rust: over L, the usual
+    // spread and the window of the pitch (0.3 % and 0.7 % over ten 1.5 mm threads).
+    return { pitch: Lmm / n, tol: Math.max(0.01, 0.1 / Lmm), typical: Math.max(0.005, 0.05 / Lmm) };
   }
   const v = parseNumber(state.p);
   if (!(v > 0)) return null;
-  return { pitch: state.pm === 'tpi' ? MM_PER_INCH / v : v, tol: GAUGE_PITCH_TOL };
+  return { pitch: state.pm === 'tpi' ? MM_PER_INCH / v : v, tol: GAUGE_PITCH_TOL, typical: GAUGE_PITCH_TYPICAL };
 }
 
 function readAngle() {
@@ -226,7 +253,7 @@ function render() {
 
   const ang = readAngle();
   const { inside, closest } = rank({
-    side: state.side, d: dMm, pitch: pitch?.pitch, pitchTol: pTol, minus, plus,
+    side: state.side, d: dMm, pitch: pitch?.pitch, pitchTol: pTol, pitchTypical: pitch?.typical, minus, plus,
     angle: ang?.angle, angleTol: ang?.tol, taper: state.taper,
   });
   const shown = inside.length ? inside : closest;

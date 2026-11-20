@@ -286,8 +286,8 @@ export const STRINGS = {
   },
   'find.winTitle': { en: 'How close is close enough', is: 'Hversu nálægt er nógu nálægt' },
   'find.winHint': {
-    en: 'Real parts are not exactly basic size: bolts measure under, holes over. Widen these for worn or damaged threads. Empty boxes use the defaults shown.',
-    is: 'Raunveruleg stykki eru ekki nákvæmlega grunnmál: boltar mælast undir, göt yfir. Víkkaðu þetta fyrir slitnar eða skemmdar gengjur. Tómir reitir nota sjálfgildin sem sjást.',
+    en: 'These decide what gets on the list, so they are generous: a worn bolt measures under, rust or dirt on the crests can make it measure over. They do not change the order, which follows how real parts usually measure (bolts under, holes over). Empty boxes use the defaults shown.',
+    is: 'Þessi mörk ráða hvað fer á listann og eru því rífleg: slitinn bolti mælist undir, ryð eða óhreinindi á toppunum geta látið hann mælast yfir. Þau breyta ekki röðinni, sem fylgir því hvernig raunveruleg stykki mælast yfirleitt (boltar undir, göt yfir). Tómir reitir nota sjálfgildin sem sjást.',
   },
   'find.minus': { en: 'Diameter, smaller by up to', is: 'Þvermál, minna um allt að' },
   'find.plus': { en: 'Diameter, larger by up to', is: 'Þvermál, stærra um allt að' },
@@ -295,8 +295,8 @@ export const STRINGS = {
   'find.reset': { en: 'Back to defaults', is: 'Aftur í sjálfgildi' },
   'find.resTitle': { en: 'It could be', is: 'Þetta gæti verið' },
   'find.rankNote': {
-    en: 'Ranked by how close each is to what you measured. Threadwise never decides for you: check the top few with a gauge or a known nut or bolt.',
-    is: 'Raðað eftir því hversu nálægt hver er því sem þú mældir. Threadwise ákveður aldrei fyrir þig: prófaðu efstu kostina með mæli eða þekktri ró eða bolta.',
+    en: 'Ranked by how likely each is, from how real parts usually measure. Threadwise never decides for you: check the top few with a gauge or a known nut or bolt.',
+    is: 'Raðað eftir því hversu líklegur hver er, út frá því hvernig raunveruleg stykki mælast yfirleitt. Threadwise ákveður aldrei fyrir þig: prófaðu efstu kostina með mæli eða þekktri ró eða bolta.',
   },
   'find.start': { en: 'Type the diameter to start.', is: 'Sláðu inn þvermálið til að byrja.' },
   'find.count': { en: '{n} threads fit what you measured, closest first.', is: '{n} gengjur passa við mælinguna, sú nálægasta fyrst.' },

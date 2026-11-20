@@ -4,7 +4,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { CATALOGUE } from '../js/catalogue.js';
-import { rank, defaultWindows, threadsToTell, snapTwoWire } from '../js/find.js';
+import { rank, defaultWindows, typicalSpread, threadsToTell, snapTwoWire } from '../js/find.js';
 import { overWires, angleFromTwoWires } from '../js/geometry.js';
 
 // A small deterministic random generator, so the test gives the same result every run.
@@ -31,8 +31,9 @@ for (const side of ['ext', 'int']) {
       for (let k = 0; k < 5; k++) {
         const base = side === 'ext' ? row.d : row.d1;
         const w = defaultWindows(side, base);
-        // Real parts: bolts up to 70 % of the window under size, holes up to 70 % over.
-        const d = side === 'ext' ? base - rnd() * 0.7 * w.minus : base + rnd() * 0.7 * w.plus;
+        const typ = typicalSpread(side, base);
+        // Real parts: bolts up to 70 % of the usual spread under size, holes up to 70 % over.
+        const d = side === 'ext' ? base - rnd() * 0.7 * typ.under : base + rnd() * 0.7 * typ.over;
         // A pitch gauge reads the nominal pitch; add up to ±0.5 % for a caliper over 10 threads.
         const pitch = row.pitch * (1 + (rnd() - 0.5) * 0.01);
         const r = rank({ side, d, pitch, minus: w.minus, plus: w.plus, pitchTol: 0.02, taper: row.taper ? 'taper' : 'parallel' });
@@ -128,4 +129,22 @@ test('a pitch gauge on a dirty bolt: 1.5 mm keeps 3/8-16 UNC in the list, and M1
   const names = r.inside.map((s) => s.row.name);
   assert.equal(names[0], 'M10');
   assert.ok(names.includes('3/8-16 UNC'), names.join(', '));
+});
+
+test('wider windows list more, but never push an unlikely thread above a likely one', () => {
+  // 9.6 mm, 1.5 mm gauge: a worn M10 (0.4 under) or a 3/8-16 UNC reading 0.075 over.
+  const narrow = rank({ side: 'ext', d: 9.6, pitch: 1.5, minus: 0.5, plus: 0.1, pitchTol: 0.06, taper: 'parallel' });
+  const wide = rank({ side: 'ext', d: 9.6, pitch: 1.5, minus: 2, plus: 2, pitchTol: 0.2, taper: 'parallel' });
+  assert.ok(wide.inside.length > narrow.inside.length);
+  // Same order for what both lists have in common.
+  const common = narrow.inside.map((s) => s.row.name);
+  assert.deepEqual(wide.inside.map((s) => s.row.name).filter((n) => common.includes(n)), common);
+  assert.equal(wide.inside[0].row.name, 'M10');
+});
+
+test('a rusty 3/8" bolt reading over size is listed (9.7 mm, 16 TPI)', () => {
+  const w = defaultWindows('ext', 9.7);
+  const r = rank({ side: 'ext', d: 9.7, pitch: 25.4 / 16, minus: w.minus, plus: w.plus, taper: 'parallel' });
+  const names = r.inside.map((s) => s.row.name);
+  assert.ok(names.includes('3/8-16 UNC') && names.includes('3/8 BSW'), names.join(', '));
 });
