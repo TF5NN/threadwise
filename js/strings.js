@@ -313,13 +313,31 @@ export const STRINGS = {
   'find.basicMajor': { en: 'Size', is: 'Nafnþvermál' },
   'find.basicMinor': { en: 'Basic bore', is: 'Kjarnaþvermál D1' },
   'find.pitch': { en: 'pitch', is: 'stigning' },
-  'find.lookalike': {
-    en: 'Look-alike: {other} has almost the same pitch. Over {n} threads they differ: {a} mm here, {b} mm there.',
-    is: 'Líkist: {other} hefur nánast sömu stigningu. Yfir {n} gengjur munar: {a} mm hér, {b} mm þar.',
+  // A look-alike warning is a head (what the other thread is) and one more sentence: how to
+  // tell them apart with a gauge, or, after measuring over N threads, what that reading says.
+  'find.laHead': {
+    en: 'Look-alike: {other} has almost the same pitch.',
+    is: 'Líkist: {other} hefur nánast sömu stigningu.',
   },
-  'find.lookalikeSize': {
-    en: 'Look-alike: {other} is only {size} off in size, with almost the same pitch. The wrong bolt can start, or be forced in, and then strip or hold weakly. Over {n} threads they differ: {a} mm here, {b} mm there.',
-    is: 'Líkist: {other} munar aðeins {size} í stærð og hefur nánast sömu stigningu. Rangur bolti getur gripið, eða verið þvingaður inn, og svo skemmt gengjurnar eða haldið illa. Yfir {n} gengjur munar: {a} mm hér, {b} mm þar.',
+  'find.laHeadSize': {
+    en: 'Look-alike: {other} is only {size} off in size, with almost the same pitch.',
+    is: 'Líkist: {other} munar aðeins {size} í stærð og hefur nánast sömu stigningu.',
+  },
+  'find.laRisk': {
+    en: 'The wrong bolt can start, or be forced in, and then strip or hold weakly.',
+    is: 'Rangur bolti getur gripið, eða verið þvingaður inn, og svo skemmt gengjurnar eða haldið illa.',
+  },
+  'find.laGauge': {
+    en: 'Over {n} threads they differ: {a} here, {b} there.',
+    is: 'Yfir {n} gengjur munar: {a} hér, {b} þar.',
+  },
+  'find.laFits': {
+    en: 'Your {len} over {count} threads fits this one ({a}); {other} would measure {b}.',
+    is: 'Mælingin þín, {len} yfir {count} gengjur, passar við þessa ({a}); {other} myndi mælast {b}.',
+  },
+  'find.laCloser': {
+    en: 'Your {len} over {count} threads is closer to {other} ({b}) than to this one ({a}). Check the count and the length.',
+    is: 'Mælingin þín, {len} yfir {count} gengjur, er nær {other} ({b}) en þessari ({a}). Athugaðu fjöldann og lengdina.',
   },
   'find.twin': {
     en: 'Twin: {other} has the same size and pitch. Only the flank angle tells them apart ({a} here, {b} there): use a thread gauge or the two-wire angle tool.',

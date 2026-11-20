@@ -148,3 +148,13 @@ test('a rusty 3/8" bolt reading over size is listed (9.7 mm, 16 TPI)', () => {
   const names = r.inside.map((s) => s.row.name);
   assert.ok(names.includes('3/8-16 UNC') && names.includes('3/8 BSW'), names.join(', '));
 });
+
+import { overThreadsCheck } from '../js/find.js';
+
+test('measured over 10 threads, the look-alike warning checks the reading (15.00 mm: M10, not 3/8-16)', () => {
+  const m10 = overThreadsCheck(1.5, 25.4 / 16, 15.0, 10);
+  assert.ok(m10.fitsHere);
+  assert.ok(Math.abs(m10.there - 15.875) < 1e-9);
+  // Seen from the 3/8-16 UNC card, the same reading points the other way.
+  assert.ok(!overThreadsCheck(25.4 / 16, 1.5, 15.0, 10).fitsHere);
+});

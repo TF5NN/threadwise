@@ -151,6 +151,17 @@ export const angleText = (row) => (row.flanks ? `${row.flanks[0]}°/${row.flanks
 const SNAP = [[30, 30], [33, [3, 30]], [55, 55], [60, 60], [80, 80]].map(([value, a]) => ({ value, k: wireConstants(a).kG }));
 export const snapTwoWire = (k) => SNAP.reduce((a, b) => (Math.abs(b.k - k) < Math.abs(a.k - k) ? b : a)).value;
 
+/**
+ * A look-alike, checked against a length measured over n threads (all in mm): what this
+ * thread and the other one would measure over the same n threads, and which the reading is
+ * closer to. Used to turn the look-alike warning into a check of the person's own reading.
+ */
+export function overThreadsCheck(pitch, otherPitch, length, n) {
+  const here = n * pitch;
+  const there = n * otherPitch;
+  return { here, there, fitsHere: Math.abs(length - here) <= Math.abs(length - there) };
+}
+
 /** Over how many threads two pitches drift apart by half a pitch: where a gauge visibly rocks. */
 export const threadsToTell = (p1, p2) => Math.ceil((0.5 * Math.min(p1, p2)) / Math.abs(p1 - p2));
 
@@ -290,15 +301,28 @@ function render() {
     go.addEventListener('click', (e) => { e.stopPropagation(); open(); });
     li.addEventListener('click', () => { if (!window.getSelection().toString()) open(); });
     li.classList.add('go');
+    // Measured over N threads? Then the warning checks that reading instead of asking for it.
+    const over = state.pm === 'over' && pitch ? { length: toMm(parseNumber(state.len), unit), n: parseNumber(state.n) } : null;
+    // Lengths over N threads as a caliper reads them: 0.01 mm (or 0.001 in).
+    const cal = (mm) => (unit === 'mm' ? `${num(mm, 2)} mm` : len(mm, unit));
     for (const other of (s.lookalikes || []).slice(0, 2)) {
       const warn = document.createElement('div');
       warn.className = 'cand-warn';
-      const n = Math.max(5, threadsToTell(r.pitch, other.row.pitch));
       const gap = Math.abs((state.side === 'ext' ? other.row.d : other.row.d1) - ref);
-      warn.textContent = t(gap < 0.05 ? 'find.lookalike' : 'find.lookalikeSize', {
-        other: other.row.name, n, size: len(gap, unit),
-        a: num(n * r.pitch, 2), b: num(n * other.row.pitch, 2),
-      });
+      let text = t(gap < 0.05 ? 'find.laHead' : 'find.laHeadSize', { other: other.row.name, size: len(gap, unit) });
+      const c = over && overThreadsCheck(r.pitch, other.row.pitch, over.length, over.n);
+      // The risk of forcing the wrong bolt is worth saying unless the reading already settles it.
+      if (gap >= 0.05 && !c?.fitsHere) text += ' ' + t('find.laRisk');
+      if (c) {
+        const v = { other: other.row.name, count: num(over.n, 0), len: cal(over.length), a: cal(c.here), b: cal(c.there) };
+        // A reading that fits this thread confirms it (a calm note); closer to the other, a warning.
+        if (c.fitsHere) warn.className = 'cand-note';
+        text += ' ' + t(c.fitsHere ? 'find.laFits' : 'find.laCloser', v);
+      } else {
+        const n = Math.max(5, threadsToTell(r.pitch, other.row.pitch));
+        text += ' ' + t('find.laGauge', { n, a: cal(n * r.pitch), b: cal(n * other.row.pitch) });
+      }
+      warn.textContent = text;
       li.append(warn);
     }
     for (const twin of (s.twins || []).slice(0, 2)) {
