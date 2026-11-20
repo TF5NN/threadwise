@@ -299,7 +299,7 @@ export const STRINGS = {
     is: 'Raðað eftir því hversu líklegur hver er, út frá því hvernig raunveruleg stykki mælast yfirleitt. Threadwise ákveður aldrei fyrir þig: prófaðu efstu kostina með mæli eða þekktri ró eða bolta.',
   },
   'find.start': { en: 'Type the diameter to start.', is: 'Sláðu inn þvermálið til að byrja.' },
-  'find.count': { en: '{n} threads fit what you measured, closest first.', is: '{n} gengjur passa við mælinguna, sú nálægasta fyrst.' },
+  'find.count': { en: '{n} threads fit what you measured, most likely first.', is: '{n} gengjur passa við mælinguna, sú líklegasta fyrst.' },
   'find.countOne': { en: 'One thread fits what you measured.', is: 'Ein gengja passar við mælinguna.' },
   'find.countOneNoPitch': { en: 'One thread fits the diameter. Add the pitch to be sure.', is: 'Ein gengja passar við þvermálið. Bættu stigningunni við til að vera viss.' },
   'find.countNoPitch': {
