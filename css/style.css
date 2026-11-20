@@ -1154,6 +1154,11 @@ table.data tr.in td {
   background: var(--tint-strong);
 }
 
+table.data tr.book td:first-child {
+  font-weight: 600;
+  color: var(--green-mid);
+}
+
 table.data tr.off td {
   color: var(--text-soft);
 }

@@ -70,12 +70,15 @@ BSP tapered. The app shows both names: "G 1/2 (BSPP)".
 | 2 Measure | ✓ Done for metric, UN, G, Pg; BSW/BSF with manual tolerance (BS 84 not sourced) |
 | 3 Find | ✓ Done: ranking, look-alikes, twins, two-wire angle tool, 2510-reading validation |
 | 4 Make | ✓ Done: limits, tap drills, radial/compound infeed, passes, taper data. Gaps listed below |
-| 5 Later | Open |
+| 5 Later | Started: Tr (trapezoidal) added from the Töflubók; R gauge distances in |
 
 **Still open** (each needs a source before it goes in):
 - BS 84 tolerances for BSW/BSF (Measure and Make show basic sizes until then).
 - Second source for the G internal minor-diameter tolerance at 11 TPI (`DISCREPANCIES.md`).
-- ISO 7-1 gauge lengths for R threads; tap drills for tapered threads.
+- Tap drills for tapered threads. (R gauge distances: done, Töflubók p. 267.)
+- ISO 2903 tolerances for Tr; DIN 158 metric taper threads (grease nipples) and S (buttress)
+  threads, both in the Töflubók (p. 266, 268).
+- The Töflubók's edition year (title page), and a second look at its M60 tap drill (55 mm?).
 - ASME B1.1 internal minor-diameter tolerance (Make shows the minimum only).
 - DIN 76 thread undercuts.
 - Bench-measured parts for `validation/find-bench.csv`.

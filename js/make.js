@@ -10,7 +10,7 @@ import * as hash from './hash.js';
 
 const $ = (id) => document.getElementById(id);
 const P = 'k.';
-export const MAKE_FAMILIES = ['M', 'UN', 'BSW', 'BSF', 'G', 'R', 'NPT', 'Pg'];
+export const MAKE_FAMILIES = ['M', 'UN', 'BSW', 'BSF', 'G', 'R', 'NPT', 'Pg', 'Tr'];
 const DEFAULTS = { fam: 'M', size: 'M:M10', side: 'ext', cls: '', u: 'mm', feed: 'flank', n: '' };
 const state = { ...DEFAULTS };
 
@@ -22,7 +22,8 @@ const state = { ...DEFAULTS };
  * For Whitworth forms the same idea uses its own depth: 100 % is D − 1.2807·P.
  */
 export function percentThread(row, drillMm) {
-  const k = row.family === 'Pg' ? row.hInt / row.pitch : FORMS[FAMILIES[row.family].form].d2k;
+  // Tr: 100 % is the full flank overlap H1 = 0.5·P, i.e. a hole of D1 = d − P.
+  const k = row.family === 'Pg' ? row.hInt / row.pitch : row.family === 'Tr' ? 0.5 : FORMS[FAMILIES[row.family].form].d2k;
   return ((row.d - drillMm) / (2 * k * row.pitch)) * 100;
 }
 
@@ -51,6 +52,12 @@ export function drillChoices(row, minor) {
     const whole = Math.floor(a / b);
     const frac = a % b ? `${a % b}/${b}` : '';
     out.push({ sys: 'in', label: `${whole ? whole + (frac ? '-' : '') : ''}${frac}"`, mm, pct, inside: minor ? mm >= minor.min - 1e-9 && (minor.max === null || mm <= minor.max + 1e-9) : null });
+  }
+  // The drill printed in the Töflubók (DIN 13-1 table) is always offered, and marked.
+  if (row.tapDrill) {
+    const hit = out.find((d) => d.sys === 'mm' && Math.abs(d.mm - row.tapDrill) < 1e-9);
+    if (hit) hit.book = true;
+    else out.push({ sys: 'mm', label: `${num(row.tapDrill, 1)} mm`, mm: row.tapDrill, pct: percentThread(row, row.tapDrill), book: true, inside: minor ? row.tapDrill >= minor.min - 1e-9 && (minor.max === null || row.tapDrill <= minor.max + 1e-9) : null });
   }
   return out;
 }
@@ -132,6 +139,9 @@ function render() {
       dl.append(row3(t('make.gaugeMajor'), ...both(row.d)));
       dl.append(row3(t('make.gaugePitch'), ...both(row.d2)));
       dl.append(row3(t('make.gaugeMinor'), ...both(row.d1)));
+      dl.append(row3('a ' + t('make.gaugeDist'), ...both(row.gauge)));
+      dl.append(row3('l1 ' + t('make.useful'), ...both(row.useful)));
+      dl.append(row3(t('make.dn'), `DN ${row.dn}`));
     }
   } else if (state.side === 'ext') {
     if (l.major) {
@@ -142,7 +152,8 @@ function render() {
       dl.append(row3(t('make.d2max'), ...both(l.d2.max)));
       dl.append(row3(t('make.d2min'), ...both(l.d2.min)));
     } else dl.append(row3(t('make.d2basic'), ...both(row.d2)));
-    dl.append(row3(t('make.rootApprox'), ...both(row.d - 2 * profileOf(row).hExt * row.pitch)));
+    dl.append(row3(t(row.family === 'M' || row.family === 'Tr' ? 'make.root' : 'make.rootApprox'), ...both(row.d3 ?? row.d - 2 * profileOf(row).hExt * row.pitch)));
+    if (row.toolWidth) dl.append(row3('b ' + t('make.toolWidth'), ...both(row.toolWidth)));
   } else {
     if (l.minor) {
       dl.append(row3(t('make.minorMin'), ...both(l.minor.min)));
@@ -152,10 +163,13 @@ function render() {
       dl.append(row3(t('make.D2min'), ...both(l.d2.min)));
       dl.append(row3(t('make.D2max'), ...both(l.d2.max)));
     } else dl.append(row3(t('make.d2basic'), ...both(row.d2)));
-    dl.append(row3(t('make.majorMinInt'), ...both(l.major ? l.major.min : row.d)));
+    if (row.D4) dl.append(row3('D4 ' + t('make.D4'), ...both(row.D4)));
+    else dl.append(row3(t('make.majorMinInt'), ...both(l.major ? l.major.min : row.d)));
+    if (row.toolWidth) dl.append(row3('b ' + t('make.toolWidth'), ...both(row.toolWidth)));
   }
   const src = $('k-source');
-  const key = { table: 'make.srcTable', formula: 'make.srcFormula', maker: 'make.srcMaker', none: 'make.srcNone', gauge: 'make.srcGauge', undefined: 'status.undefined', range: 'status.range' }[l.source];
+  const key = row.family === 'Tr' && l.source === 'none' ? 'make.srcTr' : { table: 'make.srcTable', formula: 'make.srcFormula', maker: 'make.srcMaker', none: 'make.srcNone', gauge: 'make.srcGauge', undefined: 'status.undefined', range: 'status.range' }[l.source];
+  if (row.tapDrill && state.side === 'int') src.dataset.book = '1';
   src.textContent = t(key || 'make.srcNone') + (l.note === 'unMinor' ? ' ' + t('make.unMinor') : '');
   src.className = 'note ' + (['table'].includes(l.source) ? 'info' : 'warn');
 
@@ -166,14 +180,19 @@ function render() {
     const list = drillChoices(row, l.minor || null);
     const tbody = $('k-drills');
     tbody.replaceChildren();
-    const pick = (sys) => list.filter((d) => d.sys === sys).sort((a, b) => Math.abs(a.pct - 75) - Math.abs(b.pct - 75)).slice(0, 5).sort((a, b) => a.mm - b.mm);
+    const pick = (sys) => {
+      const near75 = list.filter((d) => d.sys === sys).sort((a, b) => Math.abs(a.pct - 75) - Math.abs(b.pct - 75)).slice(0, 5);
+      const book = list.find((d) => d.sys === sys && d.book && !near75.includes(d));
+      return (book ? [...near75, book] : near75).sort((a, b) => a.mm - b.mm);
+    };
     const order = FAMILIES[fam].unit === 'in' ? ['in', 'mm'] : ['mm', 'in'];
     for (const sys of order) {
       for (const d of pick(sys)) {
         const tr = document.createElement('tr');
         const status = d.inside === null ? '' : d.inside ? t('make.inside') : d.mm < l.minor.min ? t('make.tooSmall') : t('make.tooBig');
         tr.className = d.inside === false ? 'off' : d.inside ? 'in' : '';
-        for (const text of [d.label, len(d.mm, d.sys === 'in' ? 'in' : 'mm'), num(d.pct, 0) + ' %', status]) {
+        if (d.book) tr.classList.add('book');
+        for (const text of [d.label + (d.book ? ' ★' : ''), len(d.mm, d.sys === 'in' ? 'in' : 'mm'), num(d.pct, 0) + ' %', status]) {
           const td = document.createElement('td');
           td.textContent = text;
           tr.append(td);
@@ -215,7 +234,7 @@ export function init() {
   fillSelect($('k-fam'), MAKE_FAMILIES.map((f) => [f, t('fam.' + f)]));
   $('k-fam').addEventListener('change', () => {
     state.fam = $('k-fam').value;
-    const first = family(state.fam).find((r) => ['M10', '1/2-13 UNC', '1/2 BSW', '1/2 BSF', 'G 1/2', 'R 1/2', '1/2 NPT', 'Pg 9'].includes(r.name)) || family(state.fam)[0];
+    const first = family(state.fam).find((r) => ['M10', '1/2-13 UNC', '1/2 BSW', '1/2 BSF', 'G 1/2', 'R 1/2', '1/2 NPT', 'Pg 9', 'Tr 20 × 4'].includes(r.name)) || family(state.fam)[0];
     state.size = first.id;
     state.u = FAMILIES[state.fam].unit;
     state.cls = '';

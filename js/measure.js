@@ -10,7 +10,7 @@ import { num, len, other, toMm, local, DECIMALS, fillSelect, setSeg, wireSeg, MM
 import * as hash from './hash.js';
 
 const $ = (id) => document.getElementById(id);
-export const MEASURE_FAMILIES = ['M', 'UN', 'BSW', 'BSF', 'G', 'Pg'];
+export const MEASURE_FAMILIES = ['M', 'UN', 'BSW', 'BSF', 'G', 'Pg', 'Tr'];
 
 const DEFAULTS = { fam: 'M', size: 'M:M10', d: '10', p: '1.5', mode: 'standard', cls: '6g', es: '0', ei: '-0.1', g: '', gu: 'mm', ru: 'mm', m: '' };
 const state = { ...DEFAULTS };
@@ -99,10 +99,12 @@ function readTolerance(row) {
     mark('ei', ei === null);
     if (es === null || ei === null) return { error: 'status.input' };
     if (ei >= es) return { error: 'status.order' };
-    return { es: toMm(es, inch ? 'in' : 'mm'), ei: toMm(ei, inch ? 'in' : 'mm'), status: 'status.manual' };
+    // Families without standard tolerances in Threadwise say why the deviations are typed.
+    const why = CLASS_LIST[state.fam] ? 'status.manual' : state.fam === 'Tr' ? 'status.noneTr' : 'status.noneBS84';
+    return { es: toMm(es, inch ? 'in' : 'mm'), ei: toMm(ei, inch ? 'in' : 'mm'), status: why };
   }
   const l = limits(row, 'ext', state.cls);
-  if (!l.d2) return { error: l.source === 'none' ? 'status.noneBS84' : 'status.' + l.source };
+  if (!l.d2) return { error: l.source === 'none' ? (state.fam === 'Tr' ? 'status.noneTr' : 'status.noneBS84') : 'status.' + l.source };
   const status =
     state.fam === 'M' ? (l.source === 'table' ? 'status.table' : 'status.formula')
     : state.fam === 'UN' ? 'status.unified'
@@ -117,7 +119,7 @@ function render() {
   mark('p', !row && state.size === 'own');
   const tol = row ? readTolerance(row) : { error: 'status.input' };
   const status = $('status');
-  status.className = 'note ' + (tol.error ? (tol.error === 'status.input' ? 'info' : 'warn') : ['status.formula', 'status.maker'].includes(tol.status) ? 'warn' : 'info');
+  status.className = 'note ' + (tol.error ? (tol.error === 'status.input' ? 'info' : 'warn') : ['status.formula', 'status.maker', 'status.noneTr', 'status.noneBS84'].includes(tol.status) ? 'warn' : 'info');
   status.textContent = t(tol.error || tol.status);
 
   // Wires
@@ -242,7 +244,7 @@ export function init() {
     state.g = convert(state.g, state.gu, unit);
     state.m = '';
     Object.assign(state, { fam, gu: unit, ru: unit, cls: CLASS_LIST[fam]?.defExt || '', mode: CLASS_LIST[fam] ? 'standard' : 'manual' });
-    const first = family(fam).find((r) => ['M10', '1/2-13 UNC', '1/2 BSW', '1/2 BSF', 'G 1/2', 'Pg 9'].includes(r.name)) || family(fam)[0];
+    const first = family(fam).find((r) => ['M10', '1/2-13 UNC', '1/2 BSW', '1/2 BSF', 'G 1/2', 'Pg 9', 'Tr 20 × 4'].includes(r.name)) || family(fam)[0];
     state.size = first.id;
     showFields();
     render();

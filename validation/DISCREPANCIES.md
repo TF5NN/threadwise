@@ -14,3 +14,12 @@ Nothing is changed silently.
 | 2026-11-20 | ISO preferred numbers above 1000 µm | Spreadsheet list ends at 1000 | ISO 965-1 tables go to 1250 (TD1 grade 8) | R40 series continued (1060, 1120 …). Only affects formula fallbacks for coarse internal threads. |
 | 2026-11-20 | ASME internal pitch-diameter limits | Rounding the 2B tolerance first: 1/4-20 max 0.2223 | Published: 0.2224 | ASME rounds the finished limit, not the tolerance. Threadwise does the same. |
 | 2026-11-20 | Metric M1 × 0.25 6H minor diameter | Gjengetapp table: 0.729–0.809 | ISO 965-1 TD1 table: no grade 6 at 0.25 mm pitch | Open. Threadwise uses the ISO formula for gaps and labels it. |
+| 2026-11-20 | R (BSPT) sizes | Catalogue gave R every G size (24) | Töflubók p. 267 (DIN 2999-1): 15 sizes, no 5/8, 7/8, 1 1/8, 1 3/4, 2 1/4, 2 3/4, 3 1/2, 4 1/2, 5 1/2 | **Fixed:** R only in the 15 sizes, with gauge distance a and useful length l1 from the book. |
+| 2026-11-20 | Tr 70 × 10, d3 | Töflubók p. 268 prints 59.5 | The book's own formula d3 = d − (P + 2·ac) = 59; D4 = 71 and H4 = 5.5 on the same row agree with ac = 0.5 | **59.** Printed value kept in `TR_PRINTED` and checked in `toflubok.test.mjs`. |
+| 2026-11-20 | Tr 40 × 7, tool width b | Töflubók prints 2.297 | Formula b = 0.366·P − 0.54·ac = 2.292, as printed for Tr 42 × 7 and Tr 44 × 7 | **2.292.** |
+| 2026-11-20 | 3" BSW, d2 | Töflubók p. 269 prints 72.56 | Its own d1 (66.91) and formula give 71.55; Engineers Edge 2.817" = 71.55 mm | **71.55** (exact 71.553). Misprint. |
+| 2026-11-20 | BSW values to 0.01 mm | Töflubók uses d2 = d − 0.640·P, d1 = d − 1.28·P (rounded constants, per its header) | BS 84: 0.640327, 1.280654 | Exact constants used; the book can differ by up to ~0.007 mm. Documented in the check. |
+| 2026-11-20 | M60 tap drill | Töflubók p. 265 prints 55 mm | 6H minor diameter limits 54.046–54.796 mm (ISO 965-1): 55 is outside | **Open.** Shown as printed with ★ and marked "Over" in Make. Needs a look at the book (could be a misread of 54.5 or a book rounding). |
+| 2026-11-20 | M30 × 2 6H, D2 min | Töflubók p. 270 prints 28.702 | Basic pitch diameter 28.701 (p. 265 of the same book) | **28.701.** Misprint or misread of the photo. |
+| 2026-11-20 | Whitworth status | Engineers Edge: BS 84 | Töflubók p. 269 marks Whitworth *óstaðlað* (not standardised, in the DIN context) | Noted. BS 84 tolerances still not sourced. |
+

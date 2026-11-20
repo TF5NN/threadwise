@@ -250,7 +250,7 @@
 
           <section class="panel" id="k-drill-panel" aria-labelledby="k-drill-title" hidden>
             <h2 id="k-drill-title" data-i18n="make.drillTitle">Tap drill</h2>
-            <p class="hint" data-i18n="make.drillHint">Drills near 75 % of thread. A drill inside the minor-diameter limits gives a hole the class accepts; drills often cut a little oversize.</p>
+            <p class="hint" data-i18n="make.drillHint">Drills near 75 % of thread. A drill inside the minor-diameter limits gives a hole the class accepts; drills often cut a little oversize. ★ is the drill the Töflubók gives (DIN 13-1).</p>
             <div class="table-wrap">
               <table class="data">
                 <thead><tr><th data-i18n="make.drill">Drill</th><th data-i18n="make.size">Size</th><th data-i18n="make.pct">Thread</th><th data-i18n="make.limits">Limits</th></tr></thead>
@@ -315,6 +315,7 @@
                   <option value="55">55° (Whitworth, G, R)</option>
                   <option value="60">60° (metric, UN, NPT)</option>
                   <option value="80">80° (Pg)</option>
+                  <option value="30">30° (Tr)</option>
                 </select>
               </label>
             </div>
@@ -386,7 +387,7 @@
 
       <div data-only="en" lang="en">
         <h2 id="about-title">About Threadwise</h2>
-        <p>Threadwise is three workshop tools in one, all reading from one catalogue of threads: metric ISO, unified inch (UNC, UNF, UNEF), Whitworth (BSW, BSF), pipe threads (G, R, NPT) and Pg.</p>
+        <p>Threadwise is three workshop tools in one, all reading from one catalogue of threads: metric ISO, unified inch (UNC, UNF, UNEF), Whitworth (BSW, BSF), pipe threads (G, R, NPT), Pg and metric trapezoidal (Tr).</p>
         <h3>The three tabs</h3>
         <ul>
           <li><b>Measure:</b> what the micrometer should read over three wires, for any parallel thread, and whether a part you have measured is in tolerance.</li>
@@ -398,12 +399,12 @@
           <li><b>Over the wires:</b> M = d2 + G·(1 + 1/sin(α/2)) − (P/2)·cot(α/2), for flank angle α and wire diameter G. For 60° this is the familiar d2 + 3G − 0.866025·P.</li>
           <li><b>Wire sizes:</b> the best wire touches the flanks at the pitch diameter; the smallest and largest are worked out from each thread form, including Whitworth's rounded crests.</li>
           <li><b>Tolerances:</b> tables from ISO 965-1 and ISO 228-1, ASME B1.1 formulas, and makers' limits for Pg. Where a table has a gap, the standard's formulas fill it and the app says so.</li>
-          <li><b>Every number is checked:</b> the repository has a validation folder that compares Threadwise with published tables on every change.</li>
+          <li><b>Every number is checked:</b> the repository has a validation folder that compares Threadwise with published tables on every change, including the Icelandic <i>Töflubók</i> (IÐNÚ edition of Tabellenbuch Metall).</li>
         </ul>
         <h3>Good to know</h3>
         <ul>
           <li>Tapered threads (R, NPT) are accepted with ring and plug gauges, so Measure covers parallel threads only.</li>
-          <li>Whitworth (BSW, BSF) tolerances are not in yet: Measure takes them by hand.</li>
+          <li>Whitworth (BSW, BSF) and trapezoidal (Tr) tolerances are not in yet: Measure takes them by hand.</li>
           <li>The usual wire formulas leave out the lead angle. That is fine up to about 5°; the app warns above that.</li>
           <li>The reading also depends on the measuring force and on the true size of your wires.</li>
           <li>Numbers typed with a comma or a point both work.</li>
@@ -419,24 +420,24 @@
 
       <div data-only="is" lang="is">
         <h2>Um Threadwise</h2>
-        <p>Threadwise eru þrjú verkstæðistól í einu, sem öll lesa úr einni gengjuskrá: metrískar ISO-gengjur, tommugengjur (UNC, UNF, UNEF), Whitworth (BSW, BSF), rörgengjur (G, R, NPT) og Pg.</p>
+        <p>Threadwise eru þrjú verkstæðistól í einu, sem öll lesa úr einni gengjuskrá: metra ISO-gengjur, tommugengjur (UNC, UNF, UNEF), Whitworth (BSW, BSF), rörasnitti (G, R, NPT), Pg og metra trapisugengjur (Tr).</p>
         <h3>Fliparnir þrír</h3>
         <ul>
-          <li><b>Mæla:</b> hvað míkrómælirinn á að sýna yfir þrjá víra, fyrir allar beinar gengjur, og hvort stykki sem þú hefur mælt sé innan málviks.</li>
-          <li><b>Smíða:</b> mál til að renna eða bora, borastærðir fyrir snitttappa með hlutfalli gengju, og dýpt og innmötun þegar gengja er skorin með stáli, beint inn eða á toppsleða.</li>
-          <li><b>Finna:</b> mældu óþekkta gengju og fáðu raðaðan lista yfir hvað hún gæti verið, með viðvörunum um gengjur sem líkjast. Það getur líka reiknað flankahornið út frá tveimur vírastærðum.</li>
+          <li><b>Mæla:</b> hvað míkrómælirinn á að sýna yfir þrjá víra, fyrir allar sívalar gengjur, og hvort stykki sem þú hefur mælt sé innan málviks.</li>
+          <li><b>Smíða:</b> mál til að renna eða bora, kjarnagatsborar með hlutfalli gengju, og gengjudýpt og innmötun við gengjurennsli, beint inn eða á toppsleða.</li>
+          <li><b>Finna:</b> mældu óþekkta gengju og fáðu raðaðan lista yfir hvað hún gæti verið, með viðvörunum um gengjur sem líkjast. Það getur líka reiknað gengjuhornið út frá tveimur vírastærðum.</li>
         </ul>
         <h3>Hvernig það virkar</h3>
         <ul>
-          <li><b>Mál yfir víra:</b> M = d2 + G·(1 + 1/sin(α/2)) − (P/2)·cot(α/2), fyrir flankahorn α og vírþvermál G. Fyrir 60° er þetta hið kunnuglega d2 + 3G − 0,866025·P.</li>
-          <li><b>Vírastærðir:</b> besti vírinn snertir flankana við stigningarþvermál; minnsta og stærsta stærð eru reiknaðar út frá sniði hverrar gengju, þar á meðal rúnnuðum toppum Whitworth.</li>
+          <li><b>Mál yfir víra:</b> M = d2 + G·(1 + 1/sin(α/2)) − (P/2)·cot(α/2), fyrir gengjuhorn α og vírþvermál G. Fyrir 60° er þetta hið kunnuglega d2 + 3G − 0,866025·P.</li>
+          <li><b>Vírastærðir:</b> besti vírinn snertir gengjufletina við meðalþvermál; minnsta og stærsta stærð eru reiknaðar út frá sniði hverrar gengju, þar á meðal rúnnuðum toppum Whitworth.</li>
           <li><b>Málvik:</b> töflur úr ISO 965-1 og ISO 228-1, formúlur ASME B1.1 og mörk framleiðenda fyrir Pg. Þar sem tafla hefur gat fylla formúlur staðalsins í það og forritið segir frá því.</li>
-          <li><b>Allar tölur eru prófaðar:</b> í kóðasafninu er validation-mappa sem ber Threadwise saman við útgefnar töflur við hverja breytingu.</li>
+          <li><b>Allar tölur eru prófaðar:</b> í kóðasafninu er validation-mappa sem ber Threadwise saman við útgefnar töflur við hverja breytingu, þar á meðal <i>Töflubókina</i> (IÐNÚ). Íslensku fagorðin fylgja henni líka.</li>
         </ul>
         <h3>Gott að vita</h3>
         <ul>
-          <li>Keilugengjur (R, NPT) eru samþykktar með hring- og tappamælum, svo Mæla nær aðeins yfir beinar gengjur.</li>
-          <li>Málvik fyrir Whitworth (BSW, BSF) eru ekki komin inn: í Mæla eru þau slegin inn handvirkt.</li>
+          <li>Keilulaga snitti (R, NPT) eru samþykkt með hring- og tappamælum, svo Mæla nær aðeins yfir sívalar gengjur.</li>
+          <li>Málvik fyrir Whitworth (BSW, BSF) og trapisugengjur (Tr) eru ekki komin inn: í Mæla eru þau slegin inn handvirkt.</li>
           <li>Venjulegu víraformúlurnar sleppa stigningarhorninu. Það er í lagi upp að um 5°; forritið varar við ef það fer yfir.</li>
           <li>Mælingin fer líka eftir mælikrafti og raunstærð víranna.</li>
           <li>Það má slá tölur inn með kommu eða punkti.</li>

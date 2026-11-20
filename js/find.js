@@ -240,7 +240,7 @@ export function init() {
     const tw = twoWire();
     if (!tw || tw.error) return;
     // Snap to the nearest standard angle the catalogue knows.
-    const angles = [55, 60, 80];
+    const angles = [30, 55, 60, 80];
     state.angle = String(angles.reduce((a, b) => (Math.abs(b - tw.angle) < Math.abs(a - tw.angle) ? b : a)));
     render();
   });

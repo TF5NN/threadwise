@@ -24,11 +24,12 @@ A value goes in with one tier-A source, or two independent tier-B/C sources that
 | `Accu-ISO965` | B | Accu Components, ISO metric thread tolerances, tables 1, 2, 4 | Internal metric tolerances |
 | `ISO965-2:pub` | B | Widely published 6H/6g limits for M5–M12 (as in Machinery's Handbook) | Checks only |
 | `ASME-B1.20.1` | A | NPT formulas E0 = D − (0.05·D + 1.1)·P, E1 = E0 + 0.0625·L1, L2 = (0.80·D + 6.8)·P; Table 2 rows 1/16–1/2 as quoted publicly | NPT, checks |
+| `Toflubok` | B | *Töflubók* (IÐNÚ), the Icelandic edition of Tabellenbuch Metall: pp. 264–272 (threads, tolerances, fasteners), 209, 218, 219 (turning, taper turning, drilling). Photographed by Gunnar, Nov 2026. Edition year still to be noted from the title page. | Third source for metric (DIN 13-1, ISO 965-2 6H/6g), G and R (DIN ISO 228-1, DIN 2999-1, incl. R gauge distances), BSW; only source for Tr (DIN 103); tap drills; all Icelandic terms (`docs/ORDASAFN.md`) |
 | `MH31` | B | Machinery's Handbook, 31st edition | Cross-checks for all families |
 | `Heyco-PG` | C | Heyco DIN 40430 specification sheet (basic and limit sizes) | Pg |
 | `REMS-tables` | C | REMS thread tables (Pg, G, NPT, R basic sizes) | Pg, pipe threads |
 | `Hummel-PG` | C | Hummel thread-type overview | Pg |
 
-Still to find (see PLAN.md, "Risks"): a source for BS 84 (BSW/BSF) tolerances; a second
-source for the G internal minor-diameter tolerance at 11 TPI; ISO 7-1 gauge lengths for R threads;
-ASME B1.1 internal minor-diameter tolerances.
+Still to find (see PLAN.md, "Risks"): a source for BS 84 (BSW/BSF) tolerances; ISO 2903 (Tr)
+tolerances; a second source for the G internal minor-diameter tolerance at 11 TPI; ASME B1.1
+internal minor-diameter tolerances.

@@ -1,7 +1,7 @@
 // The thread catalogue: every size of every family, with its diameters worked out, in mm.
 // All three tabs read from here. Raw lists and their sources are in js/data/catalogue-data.js.
 
-import { METRIC_COARSE, METRIC_FINE, UNIFIED, BSW, BSF, PIPE_G, NPT, PG } from './data/catalogue-data.js';
+import { METRIC_COARSE, METRIC_FINE, UNIFIED, BSW, BSF, PIPE_G, PIPE_R, NPT, PG, TRAPEZ, TAP_DRILL_COARSE } from './data/catalogue-data.js';
 import { parseInch } from './threads.js';
 
 export const IN = 25.4;
@@ -47,6 +47,16 @@ export const FORMS = {
   npt: { angle: 60, d2k: 0.8, d1k: 1.6, hExt: 0.8, hInt: 0.8, crestTop: H60 - 0.033, flankTop: H60 - 0.033 },
   // Pg: 80°, rounded crests and roots; heights come from each size's own table values.
   pg: { angle: 80 },
+  // Metric trapezoidal (DIN 103): 30°, pitch diameter d − 0.5·P, so the crest stands 0.25·P
+  // above the pitch line; the sharp groove bottom is H/2 = P/(4·tan 15°) below it.
+  // The crest corners have a small radius (≤ 0.5·ac), left out here.
+  tr: {
+    angle: 30,
+    d2k: 0.5,
+    d1k: 1,
+    crestTop: 1 / (4 * Math.tan((15 * Math.PI) / 180)) + 0.25,
+    flankTop: 1 / (4 * Math.tan((15 * Math.PI) / 180)) + 0.25,
+  },
 };
 
 // ---- Families ------------------------------------------------------------------------------
@@ -60,6 +70,7 @@ export const FAMILIES = {
   R: { form: 'whitworth', unit: 'mm', pitchAs: 'tpi', taper: true, tol: 'gauge', std: 'ISO 7-1', own: false },
   NPT: { form: 'npt', unit: 'in', pitchAs: 'tpi', taper: true, tol: 'gauge', std: 'ASME B1.20.1', own: false },
   Pg: { form: 'pg', unit: 'mm', pitchAs: 'mm', taper: false, tol: 'din40430', std: 'DIN 40430', own: false },
+  Tr: { form: 'tr', unit: 'mm', pitchAs: 'mm', taper: false, tol: 'none', std: 'DIN 103', own: false },
 };
 
 const fmt = (x) => String(x).replace(/\.0+$/, '');
@@ -84,7 +95,7 @@ function rowFromForm(family, series, name, d, pitch, extra = {}) {
 
 function build() {
   const rows = [];
-  for (const [d, p] of METRIC_COARSE) rows.push(rowFromForm('M', 'coarse', `M${fmt(d)}`, d, p, { src: ['ISO261'] }));
+  for (const [d, p] of METRIC_COARSE) rows.push(rowFromForm('M', 'coarse', `M${fmt(d)}`, d, p, { src: ['ISO261', 'Toflubok'], tapDrill: TAP_DRILL_COARSE[d] }));
   for (const [d, p] of METRIC_FINE) rows.push(rowFromForm('M', 'fine', `M${fmt(d)} × ${fmt(p)}`, d, p, { src: ['ISO261'] }));
 
   for (const [size, unc, unf, unef] of UNIFIED) {
@@ -96,15 +107,19 @@ function build() {
 
   for (const [list, family] of [[BSW, 'BSW'], [BSF, 'BSF']]) {
     for (const [size, tpi, e] of list) {
-      rows.push(rowFromForm(family, family, `${size} ${family}`, parseInch(size) * IN, IN / tpi, { dIn: parseInch(size), d2Published: e * IN, src: ['EE-Whitworth', 'Torqbolt-BSF'] }));
+      rows.push(rowFromForm(family, family, `${size} ${family}`, parseInch(size) * IN, IN / tpi, { dIn: parseInch(size), d2Published: e * IN, src: family === 'BSW' ? ['EE-Whitworth', 'Toflubok'] : ['EE-Whitworth', 'Torqbolt-BSF'] }));
     }
   }
 
   for (const [size, tpi, d, d2, d1, td2A, td1] of PIPE_G) {
     const pitch = IN / tpi;
     // Published diameters are used as printed; validation checks them against the formulas.
-    rows.push({ ...rowFromForm('G', 'G', `G ${size}`, d, pitch), d2, d1, td2A, td1, alias: `BSPP ${size}`, src: ['IS2643:2005', 'EE-ISO228'] });
-    rows.push({ ...rowFromForm('R', 'R', `R ${size}`, d, pitch), d2, d1, alias: `BSPT ${size}`, src: ['IS2643:2005'] });
+    rows.push({ ...rowFromForm('G', 'G', `G ${size}`, d, pitch), d2, d1, td2A, td1, alias: `BSPP ${size}`, src: ['IS2643:2005', 'EE-ISO228', 'Toflubok'] });
+  }
+  for (const [size, dn, gauge, useful] of PIPE_R) {
+    const g = PIPE_G.find((x) => x[0] === size);
+    const [, tpi, d, d2, d1] = g;
+    rows.push({ ...rowFromForm('R', 'R', `R ${size}`, d, IN / tpi), d2, d1, gauge, useful, dn, alias: `BSPT ${size}`, src: ['Toflubok', 'IS2643:2005'] });
   }
 
   for (const [size, tpi, D, E0, L1, E1, L2] of NPT) {
@@ -150,6 +165,27 @@ function build() {
       src: ['Heyco-PG', 'REMS-tables', 'Hummel-PG'],
     });
   }
+  for (const [d, p, d2, d3, D1, D4, H4, b] of TRAPEZ) {
+    rows.push({
+      id: `Tr:${d}x${p}`,
+      family: 'Tr',
+      series: 'Tr',
+      name: `Tr ${d} × ${p}`,
+      d,
+      pitch: p,
+      tpi: null,
+      angle: 30,
+      d2,
+      d1: D1, // the nut's minor diameter: what a caliper measures inside
+      d3, // the screw's minor (root) diameter
+      D4, // the nut's major diameter
+      hExt: H4,
+      hInt: H4,
+      toolWidth: b,
+      taper: false,
+      src: ['Toflubok'],
+    });
+  }
   return rows;
 }
 
@@ -161,6 +197,7 @@ export const family = (fam) => CATALOGUE.filter((r) => r.family === fam);
 /** Profile numbers (as multiples of P where relevant) for a row. */
 export function profileOf(row) {
   if (row.family === 'Pg') return { angle: 80, crestTop: row.crestTop, flankTop: row.flankTop, hExt: row.hExt / row.pitch, hInt: row.hInt / row.pitch };
+  if (row.family === 'Tr') return { ...FORMS.tr, hExt: row.hExt / row.pitch, hInt: row.hInt / row.pitch };
   const f = FORMS[FAMILIES[row.family].form];
   return { angle: f.angle, crestTop: f.crestTop, flankTop: f.flankTop, hExt: f.hExt, hInt: f.hInt };
 }
