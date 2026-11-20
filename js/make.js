@@ -70,13 +70,14 @@ export function drillChoices(row, minor) {
 
 /**
  * Infeed: compound angle is half the thread angle less ½°, so the trailing flank just shaves.
- * S (3°/30°): set along the 30° flank, 29.5°, so the steep 3° side does the cutting. That
- * follows from the geometry; no source for it yet, so the page says so.
+ * S (3°/30°): no source yet for how to feed a buttress thread on the compound, so the page
+ * offers straight-in (radial) infeed only; compound is null.
  */
 export function infeed(row, side) {
   const prof = profileOf(row);
   const depth = (side === 'ext' ? prof.hExt : prof.hInt) * row.pitch;
-  const compound = Array.isArray(prof.angle) ? Math.max(...prof.angle) - 0.5 : prof.angle / 2 - 0.5;
+  if (Array.isArray(prof.angle)) return { depth, compound: null, travel: null };
+  const compound = prof.angle / 2 - 0.5;
   return { depth, compound, travel: depth / Math.cos((compound * Math.PI) / 180) };
 }
 
@@ -123,7 +124,12 @@ function render() {
   $('k-size').value = row.id;
   setSeg($('k-side'), state.side);
   setSeg($('k-u'), state.u);
-  setSeg($('k-feed'), state.feed);
+  // S threads: straight in only until there is a source for compound infeed. The choice the
+  // person made is kept for other threads.
+  const radialOnly = row.family === 'S';
+  const feed = radialOnly ? 'radial' : state.feed;
+  $('k-feed').querySelector('[data-value="flank"]').disabled = radialOnly;
+  setSeg($('k-feed'), feed);
   const cls = classes();
   $('k-cls-wrap').hidden = cls.length === 0;
   fillSelect($('k-cls'), cls.map((c) => [c, c]));
@@ -206,7 +212,7 @@ function render() {
   dl.hidden = mkInt;
   $('k-cut-panel').hidden = mkInt;
   // S: the compound setting comes from the geometry, not from a source.
-  $('k-s-feed').hidden = !(row.family === 'S' && state.feed === 'flank');
+  $('k-s-feed').hidden = !radialOnly;
 
   // Drilling (inside, parallel threads)
   const drillPanel = $('k-drill-panel');
@@ -243,13 +249,14 @@ function render() {
   const n = parseNumber(state.n) || suggestedPasses(f.depth);
   $('k-n').placeholder = String(suggestedPasses(f.depth));
   $('k-depth').textContent = `${len(f.depth, u)}  ·  ${len(f.depth, o)}`;
-  $('k-compound').textContent = `${num(f.compound, 1)}°`;
-  $('k-compound-row').hidden = state.feed !== 'flank';
-  $('k-travel').textContent = `${len(f.travel, u)}  ·  ${len(f.travel, o)}`;
-  $('k-travel-row').hidden = state.feed !== 'flank';
+  $('k-compound').textContent = f.compound === null ? '–' : `${num(f.compound, 1)}°`;
+  $('k-compound-row').hidden = feed !== 'flank';
+  $('k-travel').textContent = f.travel === null ? '–' : `${len(f.travel, u)}  ·  ${len(f.travel, o)}`;
+  $('k-compound-note').hidden = radialOnly;
+  $('k-travel-row').hidden = feed !== 'flank';
   const tb = $('k-passes');
   tb.replaceChildren();
-  const k = state.feed === 'flank' ? 1 / Math.cos((f.compound * Math.PI) / 180) : 1;
+  const k = feed === 'flank' ? 1 / Math.cos((f.compound * Math.PI) / 180) : 1;
   for (const p of passes(f.depth, Math.min(40, Math.max(1, Math.round(n))))) {
     const tr = document.createElement('tr');
     for (const text of [String(p.i), len(p.step * k, u), len(p.cum * k, u), len(p.cum, u)]) {
@@ -259,7 +266,7 @@ function render() {
     }
     tb.append(tr);
   }
-  $('k-pass-head-feed').textContent = t(state.feed === 'flank' ? 'make.onCompound' : 'make.onCross');
+  $('k-pass-head-feed').textContent = t(feed === 'flank' ? 'make.onCompound' : 'make.onCross');
   hash.write();
 }
 

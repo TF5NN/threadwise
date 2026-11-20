@@ -46,11 +46,11 @@ test('pass schedule ends exactly at full depth and the passes shrink', () => {
   for (let i = 1; i < p.length; i++) assert.ok(p[i].step < p[i - 1].step);
 });
 
-test('S buttress: depths from the DIN 513 table, compound along the 30° flank, 100 % thread at D1', () => {
+test('S buttress: depths from the DIN 513 table, straight-in only (no compound), 100 % thread at D1', () => {
   const s = row('S 40 × 7');
   const ext = infeed(s, 'ext');
   near(ext.depth, 6.074, 1e-9, 'h3');
-  near(ext.compound, 29.5, 1e-9, 'compound');
+  assert.equal(ext.compound, null, 'no compound setting until there is a source');
   near(infeed(s, 'int').depth, 5.25, 1e-9, 'H1');
   near(percentThread(s, 29.5), 100, 1e-9, 'drill at D1 = 100 %');
   // Drills are offered around 75 %, i.e. well above D1, for the nut.

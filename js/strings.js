@@ -90,8 +90,8 @@ export const STRINGS = {
     is: 'Það er engin keilulaga innangengja fyrir DIN 158: smurkoppurinn eða tappinn skrúfast í venjulega sívala {size} innangengju (6H). Veldu {size} undir metra ISO-gengjum fyrir kjarnagatsbor og mál.',
   },
   'make.sFeed': {
-    en: 'S thread (3°/30°): the compound is set along the 30° flank, so the steep 3° side does the cutting. This follows from the geometry; I have no source for it yet, so check your insert maker’s advice.',
-    is: 'Sagarsnitti (3°/30°): toppsleðinn er stilltur samsíða 30° fletinum, svo bratti 3° kanturinn sker. Þetta leiðir af lögun gengjunnar; ég hef ekki heimild fyrir því enn, svo athugaðu ráð framleiðanda skurðarplötunnar.',
+    en: 'S thread (3°/30°): straight-in infeed only for now. Compound infeed for buttress threads needs a source before it goes in.',
+    is: 'Sagarsnitti (3°/30°): aðeins bein innmötun í bili. Innmötun á toppsleða fyrir sagarsnitti þarf heimild áður en hún fer inn.',
   },
   'find.twS': {
     en: 'About 34° is what the S buttress thread (3°/30°) gives over two wires.',

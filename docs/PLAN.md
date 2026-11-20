@@ -81,7 +81,7 @@ BSP tapered. The app shows both names: "G 1/2 (BSPP)".
 - Tap drills for tapered threads. (R gauge distances: done, Töflubók p. 267.)
 - ISO 2903 tolerances for Tr; DIN 513-2/-3 tolerances for S; a second source for the DIN 158
   and DIN 513 tables (one source each so far, checked against their own formulas).
-- A source for the compound setting on S threads (Make uses 29.5° along the 30° flank, from the geometry).
+- A source for compound infeed on S threads (Make offers straight-in only until then).
 - The Töflubók's edition year (title page). (M60 tap drill settled at 54.5 mm from tap makers' data.)
 - ASME B1.1 internal minor-diameter tolerance (Make shows the minimum only).
 - DIN 76 thread undercuts.
