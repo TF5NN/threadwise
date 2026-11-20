@@ -212,6 +212,40 @@ the ASME tap-drill tables; infeed depths vs Machinery's Handbook and a tool make
 Tr (trapezoidal), ACME, BA, UNS; taper threads in Measure (pitch diameter at a plane);
 printable shop sheet for a thread; site pages and "How it came to be" story.
 
+### Shelved: bolt material and strength (20 Nov 2026)
+
+**The idea.** After Find, help choose what to make a replacement bolt from. Read the head
+marking (8.8, 10.9, A2-70, UNF Grade S), compare it with the bar stock on hand, and give a
+verdict: OK, get-home bolt only (with the risks spelled out), or no. Add galvanic and
+material compatibility warnings. Bolts, nuts and material only, no washers or rivets.
+
+**Why it is shelved.** Threadwise stays threads only. Every number in it can be checked
+against a table; bolt strength mostly "depends", and the idea has too many gotchas to do
+cleanly:
+
+- Bar stock is not a bolt. Annealed 304/316 bar yields far below an A2-70 bolt, because
+  A2-70 gets its strength from cold work. Mild steel (S235/S355) is roughly class 4.6–5.8.
+  42CrMo4 / 4140 bought hardened and tempered comes closest to 8.8–10.9, depending on
+  diameter. (Rough figures from memory: source them before use.)
+- Stronger is not always better: harder bolts are more brittle, zinc-plated 12.9 risks
+  hydrogen embrittlement, and some fasteners (shear pins, breakaway bolts) are meant to be
+  the weak link.
+- A turned bolt is weaker in fatigue than a bought one: cut threads instead of rolled, and
+  a sharp corner under the head where it should have a radius.
+- The nut has to match the bolt's class; torque changes with grade and coating.
+- Markings can be missing or false, so any answer is "if the marking is honest".
+- Galvanic corrosion depends on the pair, the coating and whether it is wet.
+
+**If it comes back.** Smallest version: one "turning it from" dropdown in Make, with a
+verdict line and an expandable "why". The bigger version (marking decoder, galvanic
+checker) belongs in a separate TF5NN app that Threadwise links to. Threadwise already
+knows the tensile stress area, which is half of a strength check.
+
+**Story for the video.** A JCB breaks a bolt in the field. The 3CX mixes UNF Grade S and
+metric 8.8 bolts (both torque tables are in its service manual), and the manual says never
+to replace a bolt with a lower tensile spec. Find → Make → Measure, with the disclaimer
+at the start, and the material choice said out loud rather than done by the app.
+
 ---
 
 ## Validation in the repo
