@@ -13,6 +13,8 @@ const P = 'f.';
 const DEFAULTS = {
   side: 'ext', d: '', du: 'mm', pm: 'mm', p: '', len: '', n: '10', angle: '', taper: 'any',
   wm: '', wp: '', pw: '', g1: '', m1: '', g2: '', m2: '', wu: 'mm',
+  // Flank angle tool: three wires (the usual way) or one wire with the anvil on the thread tops.
+  tw: '3',
 };
 const state = { ...DEFAULTS };
 
@@ -115,20 +117,23 @@ function readAngle() {
 
 /**
  * Flank angle from the two-wire readings. Over a real thread the reading grows 2.5 to 5 times
- * as much as the wire does (80° to 29° threads), so anything else is a typing or measuring
- * slip, and the message says which kind.
+ * as much as the wire does (80° to 29° threads), or half that with one wire, so anything else
+ * is a typing or measuring slip, and the message says which kind.
  */
 function twoWire() {
   const vals = ['g1', 'm1', 'g2', 'm2'].map((k) => parseNumber(state[k]));
   if (vals.some((v) => v === null)) return null;
   const [g1, m1, g2, m2] = vals.map((v) => toMm(v, state.wu));
   if (g1 === g2) return { error: 'find.twSame' };
+  const wires = state.tw === '1' ? 1 : 3;
+  const half = wires === 1 ? 0.5 : 1; // one wire: the reading moves half as much
   const k = (m2 - m1) / (g2 - g1);
   if (k <= 0) return { error: 'find.twOrder' };
-  const r = angleFromTwoWires(m1, g1, m2, g2);
-  const ratio = { ratio: num(k, 2), dg: len(Math.abs(g2 - g1), state.wu), lo: len(2.5 * Math.abs(g2 - g1), state.wu), hi: len(5 * Math.abs(g2 - g1), state.wu) };
+  const r = angleFromTwoWires(m1, g1, m2, g2, wires);
+  const dg = Math.abs(g2 - g1);
+  const ratio = { ratio: num(k, 2), dg: len(dg, state.wu), lo: len(2.5 * half * dg, state.wu), hi: len(5 * half * dg, state.wu) };
   if (!r) return { error: 'find.twRatio', ...ratio };
-  const sigma = angleUncertainty(r.angle, g1, g2, 0.002, 0.001);
+  const sigma = angleUncertainty(r.angle, g1, g2, 0.002, 0.001, wires);
   const odd = r.angle < 25 || r.angle > 90;
   return { ...r, sigma, odd, ...ratio };
 }
@@ -139,6 +144,8 @@ function render() {
   setSeg($('f-pm'), state.pm);
   setSeg($('f-taper'), state.taper);
   setSeg($('f-wu'), state.wu);
+  setSeg($('f-tw-way'), state.tw);
+  $('f-tw-hint').textContent = t(state.tw === '1' ? 'find.twHint1' : 'find.twHint');
   $('f-d-label').textContent = t(state.side === 'ext' ? 'find.dExt' : 'find.dInt');
   $('f-d-hint').textContent = t(state.side === 'ext' ? 'find.dExtHint' : 'find.dIntHint');
   for (const el of document.querySelectorAll('.f-du-text')) el.textContent = state.du;
@@ -258,7 +265,7 @@ function render() {
 
 export function init() {
   hash.register(P, state, DEFAULTS);
-  const segs = [['f-side', 'side'], ['f-du', 'du'], ['f-pm', 'pm'], ['f-taper', 'taper'], ['f-wu', 'wu']];
+  const segs = [['f-side', 'side'], ['f-du', 'du'], ['f-pm', 'pm'], ['f-taper', 'taper'], ['f-wu', 'wu'], ['f-tw-way', 'tw']];
   for (const [id, key] of segs) wireSeg($(id), () => state[key], (v) => { state[key] = v; render(); });
   for (const id of ['d', 'p', 'len', 'n', 'wm', 'wp', 'pw', 'g1', 'm1', 'g2', 'm2']) {
     $('f-' + id).addEventListener('input', () => {

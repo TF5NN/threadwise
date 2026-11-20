@@ -362,7 +362,11 @@
           <section class="panel" aria-labelledby="f-tw-title">
             <details class="more">
               <summary><h2 id="f-tw-title" data-i18n="find.twTitle">Flank angle from two wire sizes</h2></summary>
-              <p class="hint" data-i18n="find.twHint">Measure over three wires of one size, then over three wires of another size, at the same spot. The difference gives the flank angle, whatever the diameter or pitch. Two sizes about 0.4 mm apart and a micrometer that repeats to 2 µm give the angle to about ±0.4°.</p>
+              <div class="unit-pick"><div class="seg small" role="radiogroup" aria-label="Method" data-i18n-attr="aria-label:find.twWay" id="f-tw-way">
+                <button type="button" role="radio" data-value="3" data-i18n="find.tw3">3 wires</button>
+                <button type="button" role="radio" data-value="1" data-i18n="find.tw1">1 wire</button>
+              </div></div>
+              <p class="hint" id="f-tw-hint">Measure over three wires of one size, then over three wires of another size, at the same spot. The difference gives the flank angle, whatever the diameter or pitch. Two sizes about 0.4 mm apart and a micrometer that repeats to 2 µm give the angle to about ±0.4°.</p>
               <div class="unit-pick"><div class="seg small" role="radiogroup" aria-label="Unit" id="f-wu">
                 <button type="button" role="radio" data-value="mm">mm</button>
                 <button type="button" role="radio" data-value="in">in</button>
@@ -447,7 +451,7 @@
           <h3>Disclaimer</h3>
           <p>Threadwise is a free hobby project. The calculations are checked against published sources, and the checks are in the <a href="https://github.com/TF5NN/threadwise/tree/main/validation">validation folder</a> of the repository, but I take no responsibility for their correctness, or for anything made, measured or accepted with them. Check anything that matters against the standard, with proper gauges.</p>
         </div>
-        <p class="small">Free to use under CC BY 4.0. Nothing you type leaves your browser.</p>
+        <p class="small">Free to use under CC BY 4.0. Nothing you type leaves your browser. Visits are counted anonymously with GoatCounter: that the page was opened, from which country and which site led here. No cookies.</p>
       </div>
 
       <div data-only="is" lang="is">
@@ -482,11 +486,13 @@
           <h3>Fyrirvari</h3>
           <p>Threadwise er frítt áhugamálsverkefni. Útreikningarnir eru bornir saman við útgefnar heimildir og prófanirnar eru í <a href="https://github.com/TF5NN/threadwise/tree/main/validation">validation-möppu</a> kóðasafnsins, en ég ber enga ábyrgð á réttmæti þeirra, né á neinu sem er smíðað, mælt eða samþykkt út frá þeim. Berðu allt sem skiptir máli saman við staðalinn og notaðu viðeigandi mæla.</p>
         </div>
-        <p class="small">Frjálst til notkunar samkvæmt CC BY 4.0. Ekkert sem þú slærð inn fer út úr vafranum.</p>
+        <p class="small">Frjálst til notkunar samkvæmt CC BY 4.0. Ekkert sem þú slærð inn fer út úr vafranum. Heimsóknir eru taldar nafnlaust með GoatCounter: að síðan var opnuð, frá hvaða landi og hvaða síða vísaði hingað. Engar vafrakökur.</p>
       </div>
     </dialog>
 
-    <!-- Anonymous visit counting (GoatCounter), the same as the other TF5NN apps: page opens only, no cookies. -->
-    <script data-goatcounter="https://tf5nn.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
+    <!-- Anonymous visit counting (GoatCounter), the same as the other TF5NN apps: page opens only, no cookies.
+         The path is fixed, as in Sightline, so nothing from the page address is ever sent. -->
+    <script data-goatcounter="https://tf5nn.goatcounter.com/count" data-goatcounter-settings='{"path": "/threadwise/"}'
+            async src="https://gc.zgo.at/count.js"></script>
   </body>
 </html>

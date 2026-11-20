@@ -180,6 +180,14 @@ known to 1 µm, two wires 0.4 mm apart give the angle to about ±0.4° (1σ), so
 are clearly separated. Phase 3 adds: wire pairs that fit every candidate angle, and a check
 that both wires touch the straight flank (Whitworth's rounded form limits this).
 
+**One wire (added 20 Nov 2026, Gunnar's idea):** one wire in a groove, the micrometer's anvil
+on the thread tops opposite. Each side of a three-wire reading is half of it, so the one-wire
+reading is (crest diameter + three-wire reading) / 2, and the crests drop out of the
+difference: sin(α/2) = 1 / (2·(M2 − M1)/(G2 − G1) − 1). Derived from the Thread Check wire
+formula, no new source needed; checked in `validation/wire-geometry.test.mjs` against a
+wire dropped into a modelled groove point by point. Micrometer errors count double, so
+0.4 mm apart gives about ±0.6°, 0.8 mm apart about ±0.3°. Three wires stay the default.
+
 **Validation:** a synthetic test set. For every catalogue thread, generate realistic
 readings (worn external, oversize internal, gauge pitch, caliper over 10 threads) with
 noise; the right thread must be in the top three, and look-alikes must be flagged. Plus a

@@ -255,6 +255,13 @@ export const STRINGS = {
     en: 'Measure over three wires of one size, then over three wires of another size, at the same spot. The difference gives the flank angle, whatever the diameter or pitch. Two sizes about 0.4 mm apart and a micrometer that repeats to 2 µm give the angle to about ±0.4°.',
     is: 'Mældu yfir þrjá víra af einni stærð, svo yfir þrjá víra af annarri stærð, á sama stað. Munurinn gefur gengjuhornið, óháð þvermáli eða stigningu. Tvær stærðir með um 0,4 mm mun og míkrómælir sem endurtekur sig upp á 2 µm gefa hornið upp á um ±0,4°.',
   },
+  'find.twWay': { en: 'Method', is: 'Aðferð' },
+  'find.tw3': { en: '3 wires', is: '3 vírar' },
+  'find.tw1': { en: '1 wire', is: '1 vír' },
+  'find.twHint1': {
+    en: 'Lay one wire in a groove and rest the micrometer\'s anvil on the thread tops on the other side. Measure, then swap in a wire of another size, same groove, anvil on the same tops, and measure again. The tops drop out, but the readings move half as much as over three wires: two sizes about 0.4 mm apart give the angle to about ±0.6°, 0.8 mm apart about ±0.3°. The anvil must rest on at least two tops, and they must be undamaged.',
+    is: 'Leggðu einn vír í gengjufar og láttu steðja míkrómælisins hvíla á gengjutoppunum hinum megin. Mældu, settu svo vír af annarri stærð í sama far, steðjann á sömu toppa, og mældu aftur. Topparnir detta út, en mælingin breytist helmingi minna en yfir þrjá víra: tvær stærðir með um 0,4 mm mun gefa hornið upp á um ±0,6°, 0,8 mm mun um ±0,3°. Steðjinn verður að hvíla á minnst tveimur toppum, og þeir mega ekki vera skemmdir.',
+  },
   'find.g1': { en: 'Wire 1', is: 'Vír 1' },
   'find.m1': { en: 'Reading 1', is: 'Mæling 1' },
   'find.g2': { en: 'Wire 2', is: 'Vír 2' },

@@ -50,29 +50,37 @@ export function pitchDiameterFrom(m, pitch, wire, angle) {
  * The included flank angle from two measurements over two different wire sizes on the same
  * spot of the same thread. M2 − M1 = (G2 − G1)·(1 + 1/sin(α/2)), so the pitch diameter and the
  * pitch drop out. Returns null when the readings cannot come from a real thread.
- * @returns {{ angle: number, k: number } | null} angle in degrees
+ *
+ * wires = 1 is the one-wire way: one wire in a groove, the micrometer's anvil on the thread
+ * tops on the other side. Each side of a three-wire reading is half of it, so the one-wire
+ * reading is (crest diameter + three-wire reading) / 2. The crests stay put between the two
+ * readings and drop out too, leaving M2 − M1 = (G2 − G1)·(1 + 1/sin(α/2)) / 2.
+ * @returns {{ angle: number, k: number } | null} angle in degrees; k is the three-wire ratio
  */
-export function angleFromTwoWires(m1, g1, m2, g2) {
+export function angleFromTwoWires(m1, g1, m2, g2, wires = 3) {
   if (g1 === g2) return null;
-  const k = (m2 - m1) / (g2 - g1);
+  const k = ((wires === 1 ? 2 : 1) * (m2 - m1)) / (g2 - g1);
   if (!(k > 2)) return null; // k = 2 would be a flat (180°) thread
   return { angle: 2 * (Math.asin(1 / (k - 1)) * 180) / Math.PI, k };
 }
 
-/**
- * How precisely two-wire readings pin down the angle: one standard deviation, in degrees,
- * for a given spread of micrometer readings (σM) and of wire sizes (σG), all in mm.
- */
 /** The symmetric angle that gives the same two-wire ratio (≈ 34° for the 3°/30° S thread). */
 export function equivalentAngle(angle) {
   const { kG } = wireConstants(angle);
   return (2 * Math.asin(1 / (kG - 1)) * 180) / Math.PI;
 }
 
-export function angleUncertainty(angle, g1, g2, sigmaM, sigmaG) {
+/**
+ * How precisely two-wire readings pin down the angle: one standard deviation, in degrees,
+ * for a given spread of micrometer readings (σM) and of wire sizes (σG), all in mm.
+ * With one wire the readings move half as much, so micrometer errors count double; wire
+ * errors count the same.
+ */
+export function angleUncertainty(angle, g1, g2, sigmaM, sigmaG, wires = 3) {
   const { kG: k } = wireConstants(angle);
   const dG = Math.abs(g2 - g1);
-  const sigmaK = Math.sqrt(2 * sigmaM ** 2 + 2 * k ** 2 * sigmaG ** 2) / dG;
+  const f = wires === 1 ? 2 : 1;
+  const sigmaK = Math.sqrt(2 * (f * sigmaM) ** 2 + 2 * k ** 2 * sigmaG ** 2) / dG;
   const half = rad(angle / 2);
   const dHalf = sigmaK / ((k - 1) ** 2 * Math.cos(half)); // from sin(α/2) = 1/(k − 1)
   return (2 * dHalf * 180) / Math.PI;

@@ -628,6 +628,10 @@ p.field-hint {
 .unit-pick .seg {
   margin-bottom: 3px;
 }
+/* A method switch above its explanation (the flank angle tool's 3 wires / 1 wire). */
+.unit-pick + .hint {
+  margin-top: 10px;
+}
 
 .wire-sizes {
   display: grid;

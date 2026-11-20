@@ -3,7 +3,8 @@
 Screw thread tools for the workshop, in English and Icelandic:
 
 - **Find**: measure an unknown thread and get a ranked list of what it could be, with look-alike
-  warnings and a flank-angle tool that works from two wire sizes.
+  warnings and a flank-angle tool that works from two wire sizes (over three wires, or one wire
+  with the anvil on the thread tops).
 - **Make**: sizes to turn or bore, tap drills with % of thread, and single-point depth and infeed.
 - **Measure**: what the micrometer should read over three wires, and whether your part is in tolerance.
 

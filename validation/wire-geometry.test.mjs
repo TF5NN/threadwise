@@ -140,3 +140,43 @@ test('S thread: two wires give the equivalent angle of about 34° (ratio 4.4237)
   near(r.k, 4.42365, 1e-4, 'ratio');
   near(r.angle, 33.966, 2e-3, 'equivalent angle');
 });
+
+// ---- One wire, anvil on the thread tops ------------------------------------------------------
+// Checked without the wire formula: a wire is dropped into a modelled groove point by point
+// (it settles where it first touches the profile), and the anvil rests on the flat crests on
+// the other side. If the one-wire maths in geometry.js is right, it gets the angle back.
+
+/** Height of the wire's top above the axis, found by brute force over the profile. */
+function wireTop(G, P, E, D, angle) {
+  const t = Math.tan(((angle / 2) * Math.PI) / 180);
+  const surface = (x) => Math.min(E / 2 - (P / 4 - Math.abs(x)) / t, D / 2); // V groove, crests cut flat at D
+  let centre = -Infinity;
+  const N = 200000;
+  for (let i = 0; i <= N; i++) {
+    const x = (-G / 2) + (G * i) / N;
+    centre = Math.max(centre, surface(x) + Math.sqrt(Math.max(0, (G / 2) ** 2 - x * x)));
+  }
+  return centre + G / 2;
+}
+
+test('one wire against the crests gives the angle back (modelled groove, no wire formula)', () => {
+  for (const [angle, P, E, D, g1, g2] of [
+    [60, 1.5, 9.026, 10, 0.8, 1.0],      // M10 x 1.5
+    [55, 2.1167, 11.43, 12.7, 1.0, 1.4], // 1/2" BSW
+    [30, 4, 18, 20, 1.8, 2.4],           // Tr 20 x 4
+  ]) {
+    const one = (g) => wireTop(g, P, E, D, angle) + D / 2; // spindle on the wire, anvil on the crests
+    const r = angleFromTwoWires(one(g1), g1, one(g2), g2, 1);
+    near(r.angle, angle, 0.01, `one-wire angle ${angle}°`);
+    // The same model over three wires agrees with the published formula.
+    near(2 * wireTop(g1, P, E, D, angle), overWires(E, P, g1, angle), 1e-5, `three-wire ${angle}°`);
+  }
+});
+
+test('one wire is less precise than three, but still tells 55° from 60°', () => {
+  const three = angleUncertainty(55, 1.0, 1.4, 0.002, 0.001, 3);
+  const one = angleUncertainty(55, 1.0, 1.4, 0.002, 0.001, 1);
+  assert.ok(one > three, `${one} > ${three}`);
+  assert.ok(one < 0.7, 'σ = ' + one); // the ±0.6° in the hint
+  assert.ok(angleUncertainty(55, 1.0, 1.8, 0.002, 0.001, 1) < 0.35); // the ±0.3° in the hint
+});
