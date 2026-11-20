@@ -33,10 +33,15 @@ export const pitchDiameterFrom = (m, pitch, wire) => m - 3 * wire + WIRE_K * pit
 /** Lead angle in degrees, for a single-start thread. */
 export const leadAngle = (d2, pitch) => (Math.atan(pitch / (Math.PI * d2)) * 180) / Math.PI;
 
+// The spreadsheet's list stops at 1000 µm. Above that ISO 965-1 continues the R40 series
+// (1060, 1120, 1180, 1250 …), needed for coarse internal threads (TD1 at 5–6 mm pitch).
+const R40 = [100, 106, 112, 118, 125, 132, 140, 150, 160, 170, 180, 190, 200, 212, 224, 236, 250, 265, 280, 300, 315, 335, 355, 375, 400, 425, 450, 475, 500, 530, 560, 600, 630, 670, 710, 750, 800, 850, 900, 950];
+const PREFERRED_ALL = [...PREFERRED, ...R40.map((v) => v * 10).filter((v) => v > 1000)];
+
 /** The preferred number closest to a value (µm). Ties go to the first in the list, as in the spreadsheet. */
 export function nearestPreferred(value) {
-  let best = PREFERRED[0];
-  for (const p of PREFERRED) if (Math.abs(p - value) < Math.abs(best - value)) best = p;
+  let best = PREFERRED_ALL[0];
+  for (const p of PREFERRED_ALL) if (Math.abs(p - value) < Math.abs(best - value)) best = p;
   return best;
 }
 

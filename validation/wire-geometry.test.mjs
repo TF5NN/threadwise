@@ -60,3 +60,21 @@ test('impossible readings are refused', () => {
   assert.equal(angleFromTwoWires(10, 1, 10, 1), null);
   assert.equal(angleFromTwoWires(10, 1, 10.5, 1.5), null); // k = 1
 });
+
+import { wireRange } from '../js/geometry.js';
+import { FORMS } from '../js/catalogue.js';
+
+test('wire range from the profile reproduces the published 60° limits (0.505182·P and 1.010363·P)', () => {
+  const r = wireRange(1, FORMS.iso);
+  near(r.min, 0.505182, 2e-6, 'min');
+  near(r.max, 1.010363, 2e-6, 'max');
+});
+
+test('Whitworth wire range: the rounded form narrows it, and the best wire sits inside', () => {
+  // Worked out from the BS 84 profile (radius 0.137329·P); no published value to compare with,
+  // so this checks the result is consistent rather than equal to a table.
+  const r = wireRange(1, FORMS.whitworth);
+  assert.ok(r.min < r.best && r.best < r.max, JSON.stringify(r));
+  near(r.min, 0.5057, 1e-4, 'min'); // top of wire level with the rounded crest
+  near(r.max, 0.8527, 1e-4, 'max'); // contact where the crest rounding starts
+});

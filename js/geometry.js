@@ -53,3 +53,20 @@ export function angleUncertainty(angle, g1, g2, sigmaM, sigmaG) {
   const dHalf = sigmaK / ((k - 1) ** 2 * Math.cos(half)); // from sin(α/2) = 1/(k − 1)
   return (2 * dHalf * 180) / Math.PI;
 }
+
+/**
+ * The smallest and largest wire that measure correctly, for a thread profile.
+ * - Smallest: the top of the wire must stand above the crest, or the micrometer touches the
+ *   crest instead: (G/2)·(1 + 1/sin(α/2)) ≥ crestTop.
+ * - Largest: the wire must touch the straight part of the flank, not the crest rounding:
+ *   contact height (G/2)·cos²(α/2)/sin(α/2) ≤ flankTop.
+ * crestTop and flankTop are heights above the sharp bottom of the groove, as multiples of P.
+ */
+export function wireRange(pitch, { angle, crestTop, flankTop }) {
+  const a = rad(angle / 2);
+  return {
+    min: (2 * crestTop * pitch) / (1 + 1 / Math.sin(a)),
+    best: bestWire(pitch, angle),
+    max: (2 * flankTop * pitch * Math.sin(a)) / Math.cos(a) ** 2,
+  };
+}
