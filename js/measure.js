@@ -231,6 +231,28 @@ function render() {
   hash.write();
 }
 
+/**
+ * Switch to a family, and to one of its sizes (or the usual first size). The wire stays, in
+ * the family's unit, so the wire check can say whether it suits the new thread.
+ */
+function setFamily(fam, size) {
+  const unit = unitOf(fam);
+  state.g = convert(state.g, state.gu, unit);
+  state.m = '';
+  Object.assign(state, { fam, gu: unit, ru: unit, cls: CLASS_LIST[fam]?.defExt || '', mode: CLASS_LIST[fam] ? 'standard' : 'manual' });
+  const first = family(fam).find((r) => ['M10', '1/2-13 UNC', '1/2 BSW', '1/2 BSF', 'G 1/2', 'Pg 9', 'Tr 20 × 4', 'S 40 × 7'].includes(r.name)) || family(fam)[0];
+  state.size = size && CATALOGUE.some((r) => r.id === size && r.family === fam) ? size : first.id;
+}
+
+/** Take a thread handed over from Make: its family, size and (if it has one) class. */
+export function load({ fam, size, cls }) {
+  if (!MEASURE_FAMILIES.includes(fam)) return;
+  setFamily(fam, size);
+  if (cls && CLASS_LIST[fam]?.ext.includes(cls)) state.cls = cls;
+  showFields();
+  render();
+}
+
 /** Convert a typed value from one unit to the other, when a unit is switched. */
 function convert(text, from, to) {
   const v = parseNumber(text);
@@ -245,13 +267,7 @@ export function init() {
   fillSelect($('fam'), MEASURE_FAMILIES.map((f) => [f, t('fam.' + f)]));
 
   $('fam').addEventListener('change', () => {
-    const fam = $('fam').value;
-    const unit = unitOf(fam);
-    state.g = convert(state.g, state.gu, unit);
-    state.m = '';
-    Object.assign(state, { fam, gu: unit, ru: unit, cls: CLASS_LIST[fam]?.defExt || '', mode: CLASS_LIST[fam] ? 'standard' : 'manual' });
-    const first = family(fam).find((r) => ['M10', '1/2-13 UNC', '1/2 BSW', '1/2 BSF', 'G 1/2', 'Pg 9', 'Tr 20 × 4', 'S 40 × 7'].includes(r.name)) || family(fam)[0];
-    state.size = first.id;
+    setFamily($('fam').value);
     showFields();
     render();
   });

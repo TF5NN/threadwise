@@ -4,9 +4,13 @@ Threadwise is one app with three tabs, all reading from one catalogue of threads
 
 | Tab | Question it answers |
 |---|---|
-| **Measure** | "What should my micrometer read over the wires, and is my part in tolerance?" |
-| **Make** | "What do I drill, turn, and how deep do I cut, for this thread, inside or out?" |
 | **Find** | "I have a thread in my hand. What is it?" |
+| **Make** | "What do I drill, turn, and how deep do I cut, for this thread, inside or out?" |
+| **Measure** | "What should my micrometer read over the wires, and is my part in tolerance?" |
+
+The app opens on Find and the tabs run in workshop order (Find → Make → Measure, Nov 2026): a
+Find result opens in Make, and Make hands its thread to Measure. Each tab can still be used on
+its own. Old shared links without a tab, which meant Measure, still open Measure.
 
 The catalogue is the foundation. Each tab only asks it a different question, so the
 catalogue is built first and checked hardest.
@@ -93,7 +97,7 @@ Each phase ends with a working, published app and green checks.
 
 ### Phase 0: Foundation
 
-- Three tabs (Measure, Make, Find).
+- Three tabs (Find, Make, Measure, in workshop order).
 - Tab state in the address (`#measure`, `#make`, `#find`) so each tab can be bookmarked.
 - Catalogue data model (below) and its loader.
 - Disclaimer in the app (About, footer, first open), README and site pages. ✓ text done.

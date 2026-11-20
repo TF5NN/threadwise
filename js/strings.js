@@ -101,6 +101,18 @@ export const STRINGS = {
     en: 'DIN 158 is tapered 1:16: a parallel M{d} × {p} measures the same at one spot. Measure near both ends to tell them apart.',
     is: 'DIN 158 er keilulaga 1:16: sívöl M{d} × {p} mælist eins á einum stað. Mældu nálægt báðum endum til að greina á milli.',
   },
+  'find.toMake': { en: 'Make it →', is: 'Smíða →' },
+  'find.toMakeLabel': { en: 'Open {name} in Make', is: 'Opna {name} í Smíða' },
+  'make.toMeasure': { en: 'Measure it →', is: 'Mæla →' },
+  'make.toMeasureInt': {
+    en: 'Measure checks bolts (external threads) over wires. Switch to External to take it on, or check a nut with a thread plug gauge.',
+    is: 'Mæla prófar utangengjur yfir víra. Veldu Utangengja til að halda áfram, eða prófaðu róargengju með tappamæli.',
+  },
+  'make.toMeasureTaper': {
+    en: 'Tapered threads are checked with ring and plug gauges, not over wires, so Measure does not take them.',
+    is: 'Keilulaga gengjur eru prófaðar með hring- og tappamælum, ekki yfir víra, svo þær eru ekki í Mæla.',
+  },
+  'make.toMeasureNo': { en: 'Measure does not take this thread type yet.', is: 'Mæla tekur ekki þessa gengjugerð enn.' },
   'famShort.M': { en: 'Metric', is: 'Metra' },
   'famShort.UN': { en: 'UN', is: 'UN' },
   'famShort.BSW': { en: 'BSW', is: 'BSW' },

@@ -2,10 +2,13 @@
 
 Screw thread tools for the workshop, in English and Icelandic:
 
-- **Measure**: what the micrometer should read over three wires, and whether your part is in tolerance.
-- **Make**: sizes to turn or bore, tap drills with % of thread, and single-point depth and infeed.
 - **Find**: measure an unknown thread and get a ranked list of what it could be, with look-alike
   warnings and a flank-angle tool that works from two wire sizes.
+- **Make**: sizes to turn or bore, tap drills with % of thread, and single-point depth and infeed.
+- **Measure**: what the micrometer should read over three wires, and whether your part is in tolerance.
+
+The tabs follow the workshop: a Find result opens in Make with one tap, and Make's "Measure it"
+button carries the thread on to Measure. Every tab still works on its own, so any step can be skipped.
 
 Thread types: metric ISO, UNC/UNF/UNEF, BSW/BSF, pipe G (BSPP), R (BSPT), NPT, metric taper
 (DIN 158, grease nipples and plugs), Pg, metric trapezoidal (Tr) and metric buttress (S, DIN 513). The Icelandic follows the *Töflubók*; see [`docs/ORDASAFN.md`](docs/ORDASAFN.md).

@@ -1294,3 +1294,72 @@ details.more > button {
     padding: 8px 6px;
   }
 }
+
+/* --- Moving a thread from tab to tab (Find → Make → Measure) ------------------------------ */
+.cand.go {
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.cand.go:hover {
+  border-color: var(--green-light);
+}
+
+.cand-go {
+  display: block;
+  margin: 8px 0 0 auto;
+  min-height: 36px;
+  padding: 6px 12px;
+  font-size: 0.85rem;
+}
+
+.cand.top .cand-go,
+.next {
+  background: var(--ink);
+  color: var(--surface);
+  border-color: var(--ink);
+}
+
+.cand.top .cand-go:hover,
+.next:hover {
+  background: var(--ink-soft);
+}
+
+.next-step {
+  margin-top: 14px;
+  display: grid;
+  gap: 6px;
+  justify-items: start;
+}
+
+.next:disabled {
+  background: var(--tint-grey);
+  color: var(--text-muted);
+  border-color: var(--line);
+  cursor: not-allowed;
+}
+
+/* Where a handed-over thread lands: a short glow round the first panel. */
+@keyframes arrive {
+  from {
+    box-shadow: 0 0 0 3px var(--green-light);
+  }
+  to {
+    box-shadow: 0 0 0 3px transparent;
+  }
+}
+
+.panel.arrived {
+  animation: arrive 1.4s ease-out;
+}
+
+.panel h2:focus {
+  outline: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .panel.arrived {
+    animation: none;
+  }
+}
+

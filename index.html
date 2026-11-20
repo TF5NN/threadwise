@@ -54,9 +54,9 @@
       </header>
 
       <nav class="tabs" role="tablist" aria-label="Tools" data-i18n-attr="aria-label:tabs.label">
-        <button type="button" role="tab" id="tab-btn-measure" data-tab="measure" aria-controls="tab-measure" data-i18n="tabs.measure">Measure</button>
-        <button type="button" role="tab" id="tab-btn-make" data-tab="make" aria-controls="tab-make" data-i18n="tabs.make">Make</button>
         <button type="button" role="tab" id="tab-btn-find" data-tab="find" aria-controls="tab-find" data-i18n="tabs.find">Find</button>
+        <button type="button" role="tab" id="tab-btn-make" data-tab="make" aria-controls="tab-make" data-i18n="tabs.make">Make</button>
+        <button type="button" role="tab" id="tab-btn-measure" data-tab="measure" aria-controls="tab-measure" data-i18n="tabs.measure">Measure</button>
       </nav>
 
       <main>
@@ -206,6 +206,10 @@
               <label><span data-i18n="cls.label">Tolerance class</span><select id="k-cls"></select></label>
             </div>
             <p class="pitch-line" id="k-pitch"></p>
+            <div class="next-step">
+              <button type="button" class="next" id="k-to-measure" data-i18n="make.toMeasure">Measure it →</button>
+              <p class="hint" id="k-to-measure-why" hidden></p>
+            </div>
           </section>
 
           <section class="panel" id="k-cut-panel" aria-labelledby="k-cut-title">
@@ -393,9 +397,10 @@
         <p>Threadwise is three workshop tools in one, all reading from one catalogue of threads: metric ISO, unified inch (UNC, UNF, UNEF), Whitworth (BSW, BSF), pipe threads (G, R, NPT), metric taper (DIN 158, for grease nipples and plugs), Pg, metric trapezoidal (Tr) and metric buttress (S).</p>
         <h3>The three tabs</h3>
         <ul>
-          <li><b>Measure:</b> what the micrometer should read over three wires, for any parallel thread, and whether a part you have measured is in tolerance.</li>
-          <li><b>Make:</b> sizes to turn or bore, tap drills with the percentage of thread, and depth and infeed for single-point threading, straight in or on the compound.</li>
           <li><b>Find:</b> measure an unknown thread and get a ranked list of what it could be, with warnings for look-alikes. It can also work out the flank angle from two wire sizes.</li>
+          <li><b>Make:</b> sizes to turn or bore, tap drills with the percentage of thread, and depth and infeed for single-point threading, straight in or on the compound.</li>
+          <li><b>Measure:</b> what the micrometer should read over three wires, for any parallel thread, and whether a part you have measured is in tolerance.</li>
+          <li>They follow the workshop: tap a result in Find to open it in Make, and Make's "Measure it" button takes it on to Measure. Each tab also works on its own, so skip any step.</li>
         </ul>
         <h3>How it works</h3>
         <ul>
@@ -427,9 +432,10 @@
         <p>Threadwise eru þrjú verkstæðistól í einu, sem öll lesa úr einni gengjuskrá: metra ISO-gengjur, tommugengjur (UNC, UNF, UNEF), Whitworth (BSW, BSF), rörasnitti (G, R, NPT), keilulaga metra utangengjur (DIN 158, fyrir smurkoppa og tappa), Pg, metra trapisugengjur (Tr) og sagarsnitti (S).</p>
         <h3>Fliparnir þrír</h3>
         <ul>
-          <li><b>Mæla:</b> hvað míkrómælirinn á að sýna yfir þrjá víra, fyrir allar sívalar gengjur, og hvort stykki sem þú hefur mælt sé innan málviks.</li>
-          <li><b>Smíða:</b> mál til að renna eða bora, kjarnagatsborar með hlutfalli gengju, og gengjudýpt og innmötun við gengjurennsli, beint inn eða á toppsleða.</li>
           <li><b>Finna:</b> mældu óþekkta gengju og fáðu raðaðan lista yfir hvað hún gæti verið, með viðvörunum um gengjur sem líkjast. Það getur líka reiknað gengjuhornið út frá tveimur vírastærðum.</li>
+          <li><b>Smíða:</b> mál til að renna eða bora, kjarnagatsborar með hlutfalli gengju, og gengjudýpt og innmötun við gengjurennsli, beint inn eða á toppsleða.</li>
+          <li><b>Mæla:</b> hvað míkrómælirinn á að sýna yfir þrjá víra, fyrir allar sívalar gengjur, og hvort stykki sem þú hefur mælt sé innan málviks.</li>
+          <li>Þeir fylgja verkstæðinu: smelltu á niðurstöðu í Finna til að opna hana í Smíða, og hnappurinn „Mæla“ í Smíða fer með hana áfram í Mæla. Hver flipi virkar líka einn og sér, svo það má sleppa skrefum.</li>
         </ul>
         <h3>Hvernig það virkar</h3>
         <ul>

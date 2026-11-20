@@ -7,6 +7,7 @@ import { limits, CLASS_LIST } from './tolerances.js';
 import { parseNumber } from './threads.js';
 import { num, len, other, fillSelect, setSeg, wireSeg, pitchBoth } from './format.js';
 import * as hash from './hash.js';
+import { MEASURE_FAMILIES } from './measure.js';
 
 const $ = (id) => document.getElementById(id);
 const P = 'k.';
@@ -139,6 +140,12 @@ function render() {
   const l = cls.length ? limits(row, state.side, state.cls) : limits(row, state.side, '');
   const both = (mm) => [len(mm, u), len(mm, o)];
 
+  // Next step: Measure, when it can take this thread; otherwise say why not.
+  const why = measureWhy(row);
+  $('k-to-measure').disabled = !!why;
+  $('k-to-measure-why').hidden = !why;
+  if (why) $('k-to-measure-why').textContent = t(why);
+
   // Sizes
   const dl = $('k-sizes');
   dl.replaceChildren();
@@ -270,6 +277,21 @@ function render() {
   hash.write();
 }
 
+/** Take a thread handed over from Find: family, size, and whether it is a bolt or a hole. */
+export function load({ fam, size, side }) {
+  if (!MAKE_FAMILIES.includes(fam)) return;
+  Object.assign(state, { fam, size, side: side || 'ext', u: FAMILIES[fam].unit, cls: '', n: '' });
+  render();
+}
+
+/** Can Measure take this thread? It does bolts (external), parallel, in its families. */
+function measureWhy(row) {
+  if (row.taper) return 'make.toMeasureTaper';
+  if (!MEASURE_FAMILIES.includes(row.family)) return 'make.toMeasureNo';
+  if (state.side === 'int') return 'make.toMeasureInt';
+  return null;
+}
+
 export function init() {
   hash.register(P, state, DEFAULTS);
   if (!MAKE_FAMILIES.includes(state.fam)) state.fam = 'M';
@@ -286,6 +308,11 @@ export function init() {
   $('k-size').addEventListener('change', () => { state.size = $('k-size').value; state.n = ''; render(); });
   $('k-cls').addEventListener('change', () => { state.cls = $('k-cls').value; render(); });
   $('k-n').addEventListener('input', () => { state.n = $('k-n').value; render(); });
+  $('k-to-measure').addEventListener('click', () => {
+    const row = currentRow();
+    if (measureWhy(row)) return;
+    document.dispatchEvent(new CustomEvent('goto', { detail: { tab: 'measure', fam: row.family, size: row.id, cls: state.cls } }));
+  });
   wireSeg($('k-side'), () => state.side, (v) => { state.side = v; state.cls = ''; render(); });
   wireSeg($('k-u'), () => state.u, (v) => { state.u = v; render(); });
   wireSeg($('k-feed'), () => state.feed, (v) => { state.feed = v; render(); });

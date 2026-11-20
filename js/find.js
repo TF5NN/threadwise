@@ -211,6 +211,17 @@ function render() {
     body.textContent = `${dLabel} ${len(ref, unit)} (${len(s.dd, unit, true)}) · ${t('find.pitch')} ${pitchBoth(r.pitch)}` +
       (s.dp !== null ? ` (${num((s.dp / r.pitch) * 100, 1, true)} %)` : '') + ` · ${fam.std}`;
     li.append(head, body);
+    // Workshop order: what is it → make it. The button (or a click anywhere on the card)
+    // opens this thread in Make, as a bolt or a hole like the one measured here.
+    const go = document.createElement('button');
+    go.type = 'button';
+    go.className = 'cand-go';
+    go.textContent = t('find.toMake');
+    go.setAttribute('aria-label', t('find.toMakeLabel', { name: r.name }));
+    const open = () => document.dispatchEvent(new CustomEvent('goto', { detail: { tab: 'make', fam: r.family, size: r.id, side: state.side } }));
+    go.addEventListener('click', (e) => { e.stopPropagation(); open(); });
+    li.addEventListener('click', () => { if (!window.getSelection().toString()) open(); });
+    li.classList.add('go');
     for (const other of (s.lookalikes || []).slice(0, 2)) {
       const warn = document.createElement('div');
       warn.className = 'cand-warn';
@@ -239,6 +250,7 @@ function render() {
       note.textContent = t('find.pipeNote', { size: r.name, d: len(r.d, 'mm') });
       li.append(note);
     }
+    li.append(go);
     list.append(li);
   }
   hash.write();
