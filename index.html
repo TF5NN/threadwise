@@ -14,10 +14,33 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;450;500;550;600;650;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" />
-    <link rel="stylesheet" href="css/style.css" />
-    <script src="js/lang.js"></script>
-    <script src="js/theme.js"></script>
-    <script type="module" src="js/main.js"></script>
+    <!-- "?v=dev" is a version stamp: on publishing, GitHub swaps it for the commit, so browsers
+         fetch new files after an update instead of using old copies. The import map does the
+         same for the files main.js loads. validation/site.test.mjs checks every file is listed. -->
+    <link rel="stylesheet" href="css/style.css?v=dev" />
+    <script src="js/lang.js?v=dev"></script>
+    <script src="js/theme.js?v=dev"></script>
+    <script type="importmap">
+      {
+        "imports": {
+        "./js/catalogue.js": "./js/catalogue.js?v=dev",
+        "./js/data/catalogue-data.js": "./js/data/catalogue-data.js?v=dev",
+        "./js/data/iso965-internal.js": "./js/data/iso965-internal.js?v=dev",
+        "./js/find.js": "./js/find.js?v=dev",
+        "./js/format.js": "./js/format.js?v=dev",
+        "./js/geometry.js": "./js/geometry.js?v=dev",
+        "./js/hash.js": "./js/hash.js?v=dev",
+        "./js/i18n.js": "./js/i18n.js?v=dev",
+        "./js/iso965-data.js": "./js/iso965-data.js?v=dev",
+        "./js/make.js": "./js/make.js?v=dev",
+        "./js/measure.js": "./js/measure.js?v=dev",
+        "./js/strings.js": "./js/strings.js?v=dev",
+        "./js/threads.js": "./js/threads.js?v=dev",
+        "./js/tolerances.js": "./js/tolerances.js?v=dev"
+        }
+      }
+    </script>
+    <script type="module" src="js/main.js?v=dev"></script>
   </head>
   <body>
     <div class="app-shell">

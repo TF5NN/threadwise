@@ -6,6 +6,7 @@ published when they pass.
 
 | File | What it checks | Against |
 |---|---|---|
+| `site.test.mjs` | The page loads every file with the version stamp, so updates reach browsers | Lists the files in `js/` |
 | `wire-geometry.test.mjs` | Wire formula for any angle, best wire, wire range from the profile, two-wire angle method | Thread Check constants (60°, 55°, 47½°, 29°, 40°); ISO 60° wire limits; for the 3°/30° S thread: a wire placed by bisection (no closed formula), Thread Check's best wire 0.5431·P, DIN 513 profile width w and root depth h3 |
 | `catalogue.test.mjs` | Every catalogue row | ISO 965-1 tables (metric combinations), profile formulas (BSW/BSF, G), ASME B1.20.1 formulas (NPT), the second G source |
 | `tolerances.test.mjs` | Outside and inside limits | Two independent copies of ISO 965-1; published 6H/6g limits M5–M12; ASME 2A/2B limits; ISO 228-1 second source; Pg maker data |
