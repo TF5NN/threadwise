@@ -45,7 +45,7 @@ jobs:
       - name: Collect the site files
         run: |
           mkdir _site
-          cp -r index.html favicon.svg LICENSE css js _site/
+          cp -r index.html favicon.svg LICENSE css js fonts _site/
       # The one change made on publishing: the "?v=dev" stamps in index.html become this
       # commit's short id, so browsers load the new files instead of old cached ones.
       - name: Stamp the version
