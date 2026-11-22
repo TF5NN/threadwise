@@ -246,6 +246,8 @@ export const STRINGS = {
   },
   'find.angle': { en: 'Flank angle', is: 'Gengjuhorn' },
   'find.angleUnknown': { en: 'Not known', is: 'Óþekkt' },
+  // The other angle options (55°, 80°, 30°, 3°/30°) are only symbols and need no translation.
+  'find.angle60': { en: '60° (metric, UN, NPT)', is: '60° (metragengjur, UN, NPT)' },
   'find.taper': { en: 'Parallel or tapered', is: 'Sívöl eða keilulaga' },
   'find.taperAny': { en: 'Not sure', is: 'Veit ekki' },
   'find.parallel': { en: 'Parallel', is: 'Sívöl' },

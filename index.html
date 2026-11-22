@@ -11,9 +11,8 @@
       content="What your micrometer should read over three wires, for metric ISO and unified inch external threads, with the tolerance worked out for you."
     />
     <link rel="icon" href="favicon.svg" type="image/svg+xml" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;450;500;550;600;650;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" />
+    <!-- Fonts are served from this site, not Google Fonts: see fonts/fonts.css -->
+    <link rel="stylesheet" href="fonts/fonts.css" />
     <!-- "?v=dev" is a version stamp: on publishing, GitHub swaps it for the commit, so browsers
          fetch new files after an update instead of using old copies. The import map does the
          same for the files main.js loads. validation/site.test.mjs checks every file is listed. -->
@@ -351,7 +350,7 @@
                 <select id="f-angle">
                   <option value="" data-i18n="find.angleUnknown">Not known</option>
                   <option value="55">55° (Whitworth, G, R)</option>
-                  <option value="60">60° (metric, UN, NPT)</option>
+                  <option value="60" data-i18n="find.angle60">60° (metric, UN, NPT)</option>
                   <option value="80">80° (Pg)</option>
                   <option value="30">30° (Tr)</option>
                   <option value="33">3°/30° (S)</option>
